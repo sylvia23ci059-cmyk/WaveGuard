@@ -1,0 +1,336 @@
+{
+  "type": "FeatureCollection",
+  "name": "KGF_Extracted_Natural_Drainage_Pathways",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-153-77",
+        "flow_accumulation_cells": 1394.0,
+        "strahler_order": 1,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.296539,
+            12.945279
+          ],
+          [
+            78.298342,
+            12.94303
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-57-125",
+        "flow_accumulation_cells": 2523.0,
+        "strahler_order": 2,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.339817,
+            13.031613
+          ],
+          [
+            78.34162,
+            13.029364
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-73-129",
+        "flow_accumulation_cells": 3887.0,
+        "strahler_order": 2,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.343423,
+            13.017224
+          ],
+          [
+            78.345226,
+            13.014975
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-85-133",
+        "flow_accumulation_cells": 5141.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.34703,
+            13.006432
+          ],
+          [
+            78.348833,
+            13.004184
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-97-137",
+        "flow_accumulation_cells": 7160.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.350636,
+            12.99564
+          ],
+          [
+            78.352439,
+            12.993392
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-109-141",
+        "flow_accumulation_cells": 9028.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.354243,
+            12.984848
+          ],
+          [
+            78.356046,
+            12.9826
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-237-141",
+        "flow_accumulation_cells": 20901.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.354243,
+            12.869736
+          ],
+          [
+            78.356046,
+            12.867488
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-221-145",
+        "flow_accumulation_cells": 19252.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.357849,
+            12.884125
+          ],
+          [
+            78.359652,
+            12.881877
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-225-145",
+        "flow_accumulation_cells": 19476.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.357849,
+            12.880528
+          ],
+          [
+            78.359652,
+            12.87828
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-137-149",
+        "flow_accumulation_cells": 11933.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.361456,
+            12.959668
+          ],
+          [
+            78.363259,
+            12.957419
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-141-149",
+        "flow_accumulation_cells": 12040.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.361456,
+            12.95607
+          ],
+          [
+            78.363259,
+            12.953822
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-197-149",
+        "flow_accumulation_cells": 17047.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.361456,
+            12.905709
+          ],
+          [
+            78.363259,
+            12.90346
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-201-149",
+        "flow_accumulation_cells": 17326.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.361456,
+            12.902111
+          ],
+          [
+            78.363259,
+            12.899863
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-141-257",
+        "flow_accumulation_cells": 4061.0,
+        "strahler_order": 2,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.458831,
+            12.95607
+          ],
+          [
+            78.460634,
+            12.953822
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stream_id": "STRM-177-265",
+        "flow_accumulation_cells": 9328.0,
+        "strahler_order": 3,
+        "drainage_type": "Natural Overland Flow Pathway (D8 Model)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.466044,
+            12.923695
+          ],
+          [
+            78.467847,
+            12.921447
+          ]
+        ]
+      }
+    }
+  ]
+}
