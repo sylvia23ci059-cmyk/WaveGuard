@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
+import { api } from '../services/api';
 import {
   Settings,
   Shield,
@@ -11,13 +12,35 @@ import {
   Lock,
   Database,
   Terminal,
-  Activity
+  Activity,
+  Key,
+  Sparkles,
+  Box,
+  ExternalLink
 } from 'lucide-react';
 
 export const SettingsAdmin: React.FC = () => {
-  const { userRole, setUserRole, sensors, hotspots } = useApp();
-  const [activeTab, setActiveTab] = useState<'rbac' | 'sensors' | 'thresholds' | 'audit'>('rbac');
+  const {
+    userRole,
+    setUserRole,
+    sensors,
+    addCustomSensor,
+    hotspots,
+    groqApiKey,
+    setGroqApiKey,
+    mapTilerKey,
+    setMapTilerKey,
+    terrainExaggeration,
+    setTerrainExaggeration
+  } = useApp();
+  const [activeTab, setActiveTab] = useState<'rbac' | 'api_keys' | 'sensors' | 'thresholds' | 'audit'>('api_keys');
   const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
+
+  // API Key Form State
+  const [inputGroq, setInputGroq] = useState<string>(groqApiKey);
+  const [inputMapTiler, setInputMapTiler] = useState<string>(mapTilerKey);
+  const [testingGroq, setTestingGroq] = useState<boolean>(false);
+  const [groqTestResult, setGroqTestResult] = useState<string | null>(null);
 
   // Form states for sensor registration
   const [newCode, setNewCode] = useState<string>('KGF-SEN-06');
@@ -30,8 +53,19 @@ export const SettingsAdmin: React.FC = () => {
 
   const handleRegisterSensor = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaveFeedback(`Station ${newCode} registered. Configured with warning limit ${warnM}m.`);
-    setTimeout(() => setSaveFeedback(null), 3000);
+
+    addCustomSensor({
+      station_code: newCode.trim(),
+      name: newName.trim(),
+      latitude: Number(newLat),
+      longitude: Number(newLon),
+      installation_type: newType as any,
+      warning_threshold_m: Number(warnM),
+      critical_threshold_m: Number(critM)
+    });
+
+    setSaveFeedback(`Hardware ${newCode} added to the live station fleet at ${newLat.toFixed(4)}, ${newLon.toFixed(4)}.`);
+    setTimeout(() => setSaveFeedback(null), 4000);
   };
 
   return (
@@ -60,6 +94,7 @@ export const SettingsAdmin: React.FC = () => {
       {/* 2. Settings Tabs Navigation */}
       <div className="flex items-center space-x-2 border-b border-navy-800 pb-2">
         {[
+          { id: 'api_keys', label: 'API Keys & 3D Terrain', icon: Key },
           { id: 'rbac', label: 'Role-Based Access (RBAC)', icon: Shield },
           { id: 'sensors', label: 'Sensor Station Registration', icon: Cpu },
           { id: 'thresholds', label: 'Threshold Calibration', icon: Sliders },
@@ -94,6 +129,163 @@ export const SettingsAdmin: React.FC = () => {
 
       {/* 3. Tab Contents */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-5 shadow-xl flex-1">
+        {/* TAB 0: API Keys & Groq AI */}
+        {activeTab === 'api_keys' && (
+          <div className="space-y-6 max-w-2xl">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center space-x-2">
+                <Key className="w-4 h-4 text-cyan-400" />
+                <span>API Keys & 3D Terrain Configuration</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                Connect external cloud providers for ultra-fast Llama-3 AI copilot inference and photorealistic 3D satellite elevation drapes.
+              </p>
+            </div>
+
+            {/* 1. Groq Cloud API Key */}
+            <div className="p-4 rounded-xl bg-navy-950 border border-navy-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-glow">
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-xs font-bold text-white">Groq AI Inference Key (Free)</h4>
+                    <span className="text-[10px] text-slate-400">Powers real-time natural language hydro-copilot (Llama-3.3-70B)</span>
+                  </div>
+                </div>
+                <a
+                  href="https://console.groq.com/keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] font-mono text-cyan-400 hover:underline flex items-center space-x-1"
+                >
+                  <span>Get Free Key</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  placeholder="gsk_..."
+                  value={inputGroq}
+                  onChange={(e) => setInputGroq(e.target.value)}
+                  className="w-full bg-navy-900 border border-navy-700 rounded-lg p-2 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    onClick={async () => {
+                      if (!inputGroq) return;
+                      setTestingGroq(true);
+                      setGroqTestResult(null);
+                      try {
+                        const res = await api.testGroqKey(inputGroq);
+                        setGroqTestResult(res.message);
+                        if (res.valid) {
+                          setGroqApiKey(inputGroq);
+                          setSaveFeedback('Groq API Key saved and verified successfully!');
+                        }
+                      } catch (err: any) {
+                        setGroqTestResult(`Connection failed: ${err.message}`);
+                      } finally {
+                        setTestingGroq(false);
+                      }
+                    }}
+                    disabled={testingGroq || !inputGroq}
+                    className="px-3 py-1.5 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-glow border border-cyan-500/40 text-xs font-mono font-semibold transition disabled:opacity-50"
+                  >
+                    {testingGroq ? 'Verifying with Groq...' : 'Test & Save Groq Key'}
+                  </button>
+
+                  {groqApiKey && (
+                    <span className="text-[10px] font-mono text-emerald-400 flex items-center space-x-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Key Configured</span>
+                    </span>
+                  )}
+                </div>
+
+                {groqTestResult && (
+                  <div className="p-2 rounded bg-navy-900 border border-navy-700 text-[10px] font-mono text-cyan-300">
+                    {groqTestResult}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 2. MapTiler 3D Satellite & Terrain Key */}
+            <div className="p-4 rounded-xl bg-navy-950 border border-navy-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <Box className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-xs font-bold text-white">MapTiler Key (3D Photorealistic Satellite)</h4>
+                    <span className="text-[10px] text-slate-400">Enables high-res satellite terrain drapes and global DEM (100k free/mo)</span>
+                  </div>
+                </div>
+                <a
+                  href="https://cloud.maptiler.com/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] font-mono text-cyan-400 hover:underline flex items-center space-x-1"
+                >
+                  <span>Get Free Key</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Paste MapTiler key..."
+                  value={inputMapTiler}
+                  onChange={(e) => setInputMapTiler(e.target.value)}
+                  className="w-full bg-navy-900 border border-navy-700 rounded-lg p-2 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+
+                <div className="flex justify-between items-center pt-1">
+                  <button
+                    onClick={() => {
+                      setMapTilerKey(inputMapTiler);
+                      setSaveFeedback('MapTiler key saved. 3D satellite mesh updated.');
+                    }}
+                    className="px-3 py-1.5 rounded bg-navy-800 hover:bg-navy-750 text-white border border-navy-700 text-xs font-mono font-medium transition"
+                  >
+                    Save MapTiler Key
+                  </button>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    Fallback: Free AWS Terrarium DEM (Zero-key required)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 3D Terrain Vertical Exaggeration Slider */}
+            <div className="p-4 rounded-xl bg-navy-950 border border-navy-800 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-white font-mono">3D Terrain Vertical Exaggeration</span>
+                <span className="font-mono font-bold text-cyan-400">{terrainExaggeration.toFixed(1)}x</span>
+              </div>
+              <input
+                type="range"
+                min="0.5"
+                max="3.5"
+                step="0.1"
+                value={terrainExaggeration}
+                onChange={(e) => setTerrainExaggeration(parseFloat(e.target.value))}
+                className="w-full accent-cyan-400 cursor-pointer"
+              />
+              <p className="text-[10px] text-slate-400">
+                Amplifies elevation relief across Kolar Gold Fields hills, Swarna Nallah valleys, and mining dumps.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: RBAC */}
         {activeTab === 'rbac' && (
           <div className="space-y-4 max-w-2xl">
@@ -185,6 +377,29 @@ export const SettingsAdmin: React.FC = () => {
                   onChange={(e) => setNewName(e.target.value)}
                   className="w-full bg-navy-950 border border-navy-800 rounded p-2 text-white focus:outline-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Latitude</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={newLat}
+                    onChange={(e) => setNewLat(parseFloat(e.target.value))}
+                    className="w-full bg-navy-950 border border-navy-800 rounded p-2 text-white font-mono focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-400 block mb-1">Longitude</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={newLon}
+                    onChange={(e) => setNewLon(parseFloat(e.target.value))}
+                    className="w-full bg-navy-950 border border-navy-800 rounded p-2 text-white font-mono focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

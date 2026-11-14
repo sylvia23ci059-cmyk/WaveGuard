@@ -16,6 +16,7 @@ import { RoadSafetyRouting } from './pages/RoadSafetyRouting';
 import { HistoricalAnalysis } from './pages/HistoricalAnalysis';
 import { DataSourcesRegistry } from './pages/DataSourcesRegistry';
 import { SettingsAdmin } from './pages/SettingsAdmin';
+import { AICopilotDrawer } from './components/ai/AICopilotDrawer';
 
 const MainContent: React.FC = () => {
   const { activePage } = useApp();
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
           <Sidebar />
           <MainContent />
         </div>
+        <AICopilotDrawer />
       </div>
     </AppProvider>
   );

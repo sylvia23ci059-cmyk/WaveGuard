@@ -19,6 +19,15 @@ interface AppContextType {
   toggleLayer: (layerName: keyof MapLayerState) => void;
   hotspots: Hotspot[];
   sensors: IoTStation[];
+  addCustomSensor: (sensor: {
+    station_code: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    installation_type: IoTStation['installation_type'];
+    warning_threshold_m: number;
+    critical_threshold_m: number;
+  }) => void;
   incidents: Incident[];
   weather: WeatherCurrent | null;
   selectedHotspot: Hotspot | null;
@@ -31,6 +40,14 @@ interface AppContextType {
   refreshData: () => Promise<void>;
   triggerSimulationScenario: (scenario: string) => Promise<void>;
   wsConnected: boolean;
+  mapTilerKey: string;
+  setMapTilerKey: (key: string) => void;
+  groqApiKey: string;
+  setGroqApiKey: (key: string) => void;
+  isAiOpen: boolean;
+  setIsAiOpen: (open: boolean) => void;
+  terrainExaggeration: number;
+  setTerrainExaggeration: (v: number) => void;
 }
 
 const defaultLayers: MapLayerState = {
@@ -55,11 +72,20 @@ const defaultLayers: MapLayerState = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activePage, setActivePage] = useState<string>('overview');
+  const [activePage, setActivePage] = useState<string>('map3d');
   const [userRole, setUserRole] = useState<UserRole>('admin'); // Default admin so user can test all features
   const [layers, setLayers] = useState<MapLayerState>(defaultLayers);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [sensors, setSensors] = useState<IoTStation[]>([]);
+  const [customSensors, setCustomSensors] = useState<IoTStation[]>(() => {
+    try {
+      if (typeof window === 'undefined') return [];
+      const raw = localStorage.getItem('waveguard_custom_sensors');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [weather, setWeather] = useState<WeatherCurrent | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null);
@@ -67,12 +93,73 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [sampledTerrain, setSampledTerrain] = useState<TerrainSampleResult | null>(null);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [mapTilerKey, setMapTilerKeyState] = useState<string>(() => {
+    return (import.meta as any).env?.VITE_MAPTILER_KEY || localStorage.getItem('waveguard_maptiler_key') || '';
+  });
+  const [groqApiKey, setGroqApiKeyState] = useState<string>(() => {
+    return (import.meta as any).env?.VITE_GROQ_API_KEY || localStorage.getItem('waveguard_groq_key') || '';
+  });
+  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
+  const [terrainExaggeration, setTerrainExaggeration] = useState<number>(1.8);
+
+  const setMapTilerKey = (key: string) => {
+    setMapTilerKeyState(key);
+    localStorage.setItem('waveguard_maptiler_key', key);
+  };
+
+  const setGroqApiKey = (key: string) => {
+    setGroqApiKeyState(key);
+    localStorage.setItem('waveguard_groq_key', key);
+  };
 
   const toggleLayer = (layerName: keyof MapLayerState) => {
     setLayers(prev => ({
       ...prev,
       [layerName]: !prev[layerName]
     }));
+  };
+
+  const addCustomSensor = (sensor: {
+    station_code: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    installation_type: IoTStation['installation_type'];
+    warning_threshold_m: number;
+    critical_threshold_m: number;
+  }) => {
+    const created: IoTStation = {
+      id: Date.now(),
+      station_code: sensor.station_code,
+      name: sensor.name,
+      latitude: sensor.latitude,
+      longitude: sensor.longitude,
+      channel_name: sensor.station_code.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+      installation_type: sensor.installation_type,
+      is_simulated: false,
+      provenance_label: 'FIELD_HARDWARE',
+      warning_threshold_m: sensor.warning_threshold_m,
+      critical_threshold_m: sensor.critical_threshold_m,
+      max_channel_depth_m: Math.max(sensor.critical_threshold_m, sensor.warning_threshold_m) + 0.5,
+      current_water_level_m: 0,
+      current_rainfall_mm: 0,
+      battery_pct: 100,
+      signal_rssi: -52,
+      status: 'online',
+      last_seen: new Date().toISOString()
+    };
+
+    setCustomSensors(prev => {
+      const normalisedCode = created.station_code.toLowerCase();
+      const next = prev.some(sensor => sensor.station_code.toLowerCase() === normalisedCode)
+        ? prev.map(sensor => sensor.station_code.toLowerCase() === normalisedCode ? created : sensor)
+        : [...prev, created];
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('waveguard_custom_sensors', JSON.stringify(next));
+      }
+      return next;
+    });
   };
 
   const refreshData = async () => {
@@ -166,7 +253,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         layers,
         toggleLayer,
         hotspots,
-        sensors,
+        sensors: [...sensors, ...customSensors],
+        addCustomSensor,
         incidents,
         weather,
         selectedHotspot,
@@ -178,7 +266,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isSimulating,
         refreshData,
         triggerSimulationScenario,
-        wsConnected
+        wsConnected,
+        mapTilerKey,
+        setMapTilerKey,
+        groqApiKey,
+        setGroqApiKey,
+        isAiOpen,
+        setIsAiOpen,
+        terrainExaggeration,
+        setTerrainExaggeration
       }}
     >
       {children}

@@ -246,5 +246,24 @@ export const api = {
     } catch (e) {
       return [];
     }
+  },
+
+  // 11. Groq AI Copilot
+  async sendAIChat(messages: { role: string; content: string }[], apiKey?: string, model?: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, api_key: apiKey, model })
+    });
+    return await res.json();
+  },
+
+  async testGroqKey(key: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/ai/test-key`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    return await res.json();
   }
 };

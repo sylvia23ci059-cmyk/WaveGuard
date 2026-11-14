@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const Map3DView: React.FC = () => {
-  const [showLayers, setShowLayers] = useState<boolean>(true);
+  const [showLayers, setShowLayers] = useState<boolean>(false);
   const {
     selectedHotspot,
     setSelectedHotspot,

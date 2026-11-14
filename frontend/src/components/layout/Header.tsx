@@ -2,14 +2,12 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
 import {
-  Activity,
   CloudRain,
-  Shield,
-  Radio,
-  Play,
-  RotateCcw,
-  Zap,
-  UserCheck
+  AlertTriangle,
+  MapPin,
+  Sparkles,
+  UserCheck,
+  Radio
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -17,145 +15,119 @@ export const Header: React.FC = () => {
     weather,
     userRole,
     setUserRole,
-    triggerSimulationScenario,
-    isSimulating,
-    wsConnected,
+    isAiOpen,
+    setIsAiOpen,
     sensors
   } = useApp();
 
-  // Determine overall city alert status from sensors
   const hasCritical = sensors.some(s => s.status === 'critical');
   const hasWarning = sensors.some(s => s.status === 'warning');
 
-  let alertBadge = {
-    label: 'NORMAL BASEFLOW',
-    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+  let riskBadge = {
+    label: 'Moderate',
+    color: 'text-amber-400 border-amber-500/40 bg-amber-500/10'
   };
   if (hasCritical) {
-    alertBadge = {
-      label: 'CRITICAL INUNDATION ALERT',
-      color: 'bg-red-500/20 text-red-400 border-red-500/50 glow-crimson'
+    riskBadge = {
+      label: 'High Risk',
+      color: 'text-red-400 border-red-500/50 bg-red-500/10'
     };
-  } else if (hasWarning) {
-    alertBadge = {
-      label: 'ELEVATED CHANNEL SURGE WATCH',
-      color: 'bg-amber-500/20 text-amber-400 border-amber-500/40 glow-amber'
+  } else if (!hasWarning && weather?.precipitation_mm === 0) {
+    riskBadge = {
+      label: 'Low',
+      color: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10'
     };
   }
 
   return (
-    <header className="h-16 bg-navy-900 border-b border-navy-700/80 px-4 flex items-center justify-between z-30 shrink-0">
-      {/* Brand & Study Area Identification */}
+    <header className="h-16 bg-[#070b13]/90 backdrop-blur-md border-b border-navy-800/80 px-4 flex items-center justify-between z-30 shrink-0">
+      {/* Brand & Platform Identity */}
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-glow shadow-[0_0_12px_rgba(0,242,254,0.3)]">
-          <Shield className="w-6 h-6 animate-pulse" />
-        </div>
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-lg font-bold tracking-wider text-white font-mono flex items-center">
-              WAVE<span className="text-cyan-glow">GUARD</span>
-              <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-navy-800 border border-cyan-500/30 text-cyan-400 rounded">
-                KGF
-              </span>
+        {/* WaveGuard Stylized Blue Crest */}
+        <div className="flex items-center space-x-2.5">
+          <svg className="w-8 h-8 text-cyan-400" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 22C10 14 18 14 24 22C30 30 36 24 38 20" stroke="#00f2fe" strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M6 28C11 22 17 22 22 28C27 34 33 29 36 26" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+            <path d="M10 16C14 12 19 12 23 16C27 20 31 18 33 16" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+          </svg>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white font-sans flex items-center">
+              Wave<span className="text-white">Guard</span>
             </h1>
-            <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border uppercase tracking-wider ${alertBadge.color}`}>
-              {alertBadge.label}
-            </span>
+            <p className="text-[10px] text-slate-400 tracking-wide font-sans -mt-0.5">
+              Urban Flood Intelligence Platform
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 tracking-tight flex items-center">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 mr-1.5"></span>
-            3D Urban Flood Intelligence & Situational Awareness &bull; Kolar Gold Fields Taluk
-          </p>
+        </div>
+
+        {/* Location Pill */}
+        <div className="hidden sm:flex items-center space-x-2 bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1.5 ml-3">
+          <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="leading-tight">
+            <div className="text-xs font-semibold text-white font-sans">Kolar Gold Fields (KGF)</div>
+            <div className="text-[10px] text-slate-400">Karnataka, India</div>
+          </div>
         </div>
       </div>
 
-      {/* Center: Live Meteorological & Environmental Telemetry */}
-      <div className="hidden lg:flex items-center space-x-6 bg-navy-950/80 px-4 py-1.5 rounded-lg border border-navy-800">
-        <div className="flex items-center space-x-2">
+      {/* Right Meteorological, Risk Status & AI Copilot */}
+      <div className="flex items-center space-x-2.5">
+        {/* Weather Card */}
+        <div className="hidden md:flex items-center space-x-2 bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1.5 text-xs">
           <CloudRain className="w-4 h-4 text-cyan-400" />
-          <div className="text-xs">
-            <span className="text-slate-400">Precipitation:</span>{' '}
-            <span className="font-mono font-bold text-white">
-              {weather ? `${weather.precipitation_mm} mm` : '0.0 mm'}
-            </span>
+          <div className="leading-tight font-sans">
+            <div className="font-bold text-white font-mono">
+              {weather ? `${weather.temperature_c}°C` : '24.6°C'}
+            </div>
+            <div className="text-[10px] text-slate-400">
+              {weather?.precipitation_mm ? 'Light Rain' : 'Scattered Clouds'}
+            </div>
           </div>
         </div>
 
-        <div className="h-4 w-px bg-navy-700" />
-
-        <div className="text-xs">
-          <span className="text-slate-400">Temp:</span>{' '}
-          <span className="font-mono font-bold text-white">
-            {weather ? `${weather.temperature_c}°C` : '27°C'}
+        {/* Today's Rainfall Card */}
+        <div className="hidden lg:flex flex-col bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1 text-xs leading-tight font-sans">
+          <span className="text-[10px] text-slate-400">Today's Rainfall</span>
+          <span className="font-bold text-white font-mono text-sm">
+            {weather ? `${weather.precipitation_mm} mm` : '18.4 mm'}
           </span>
         </div>
 
-        <div className="h-4 w-px bg-navy-700" />
-
-        <div className="text-xs">
-          <span className="text-slate-400">Humidity:</span>{' '}
-          <span className="font-mono font-bold text-white">
-            {weather ? `${weather.relative_humidity_pct}%` : '74%'}
-          </span>
+        {/* Risk Level Badge */}
+        <div className={`flex items-center space-x-1.5 border rounded-xl px-3 py-1.5 text-xs font-sans font-semibold ${riskBadge.color}`}>
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <div className="leading-tight">
+            <span className="text-[10px] text-slate-400 block font-normal">Risk Level</span>
+            <span className="font-bold">{riskBadge.label}</span>
+          </div>
         </div>
 
-        <div className="h-4 w-px bg-navy-700" />
+        {/* AI Copilot Button */}
+        <button
+          onClick={() => setIsAiOpen(!isAiOpen)}
+          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium border transition ${
+            isAiOpen
+              ? 'bg-cyan-500/20 text-cyan-glow border-cyan-500/50 glow-cyan'
+              : 'bg-navy-900/90 text-slate-300 border-navy-700 hover:text-white hover:border-cyan-500/40'
+          }`}
+          title="Toggle Groq AI Copilot"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <span className="hidden sm:inline">AI Copilot</span>
+        </button>
 
-        <div className="flex items-center space-x-1.5 text-xs">
-          <Radio className={`w-3.5 h-3.5 ${wsConnected ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
-          <span className="font-mono text-[11px] text-slate-300">
-            {wsConnected ? 'LIVE WS FEED' : 'OFFLINE WS'}
-          </span>
-        </div>
-      </div>
-
-      {/* Right Controls: Simulator Controls & Role Switcher */}
-      <div className="flex items-center space-x-3">
-        {/* Scenario Simulator Buttons */}
-        <div className="hidden md:flex items-center bg-navy-950/90 border border-navy-700 rounded-lg p-1 space-x-1">
-          <span className="text-[10px] uppercase font-mono px-2 py-0.5 text-slate-400 border-r border-navy-800">
-            DEMO SIMULATOR
-          </span>
-          <button
-            onClick={() => triggerSimulationScenario('convective_storm')}
-            disabled={isSimulating}
-            className="px-2.5 py-1 text-xs font-medium rounded bg-navy-800 hover:bg-navy-700 text-amber-300 hover:text-amber-200 border border-amber-500/30 flex items-center space-x-1 transition disabled:opacity-50"
-            title="Simulate sudden convective cloudburst runoff"
-          >
-            <Zap className="w-3 h-3 text-amber-400" />
-            <span>Storm Surge</span>
-          </button>
-          <button
-            onClick={() => triggerSimulationScenario('drainage_subsidence')}
-            disabled={isSimulating}
-            className="px-2.5 py-1 text-xs font-medium rounded bg-navy-800 hover:bg-navy-700 text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 flex items-center space-x-1 transition disabled:opacity-50"
-            title="Simulate post-storm water recession"
-          >
-            <RotateCcw className="w-3 h-3 text-cyan-400" />
-            <span>Recession</span>
-          </button>
-          <button
-            onClick={() => triggerSimulationScenario('normal_baseflow')}
-            disabled={isSimulating}
-            className="px-2 py-1 text-xs font-medium rounded bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white transition disabled:opacity-50"
-            title="Reset to baseline dry weather flow"
-          >
-            <span>Reset</span>
-          </button>
-        </div>
-
-        {/* Role Selector (RBAC) */}
-        <div className="flex items-center space-x-1.5 bg-navy-800/80 px-2.5 py-1.5 rounded-lg border border-navy-700">
+        {/* Role Switcher */}
+        <div className="hidden xl:flex items-center space-x-1.5 bg-navy-900/80 px-2.5 py-1.5 rounded-xl border border-navy-700">
           <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
           <select
             value={userRole}
             onChange={(e) => setUserRole(e.target.value as UserRole)}
             className="bg-transparent text-xs text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="admin" className="bg-navy-900 text-white">Chief Disaster Admin</option>
-            <option value="engineer" className="bg-navy-900 text-white">Drainage Engineer</option>
-            <option value="surveyor" className="bg-navy-900 text-white">Field Surveyor</option>
-            <option value="public" className="bg-navy-900 text-white">Public Resident</option>
+            <option value="admin" className="bg-navy-900 text-white">Admin</option>
+            <option value="engineer" className="bg-navy-900 text-white">Engineer</option>
+            <option value="surveyor" className="bg-navy-900 text-white">Surveyor</option>
+            <option value="public" className="bg-navy-900 text-white">Public</option>
           </select>
         </div>
       </div>

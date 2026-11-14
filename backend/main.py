@@ -854,6 +854,72 @@ async def websocket_telemetry(websocket: WebSocket):
         manager.disconnect(websocket)
 
 
+# ==========================================
+# 12. GROQ AI HYDRO-COPILOT API
+# ==========================================
+from backend.ai_service import query_groq_chat, DEFAULT_MODEL
+
+class AIChatRequest(BaseModel):
+    messages: List[Dict[str, str]]
+    api_key: Optional[str] = None
+    model: Optional[str] = DEFAULT_MODEL
+
+@app.post("/api/ai/chat")
+def ai_chat_completion(req: AIChatRequest):
+    """
+    Queries Groq Cloud API (Llama-3.3) with real-time KGF spatial context.
+    """
+    # Fetch live ground context from DB
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT station_code, name, current_water_level_m, warning_threshold_m, critical_threshold_m, status FROM iot_stations")
+    sensor_rows = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT hotspot_code, name, elevation_m, slope_deg, inspection_priority FROM hotspots WHERE inspection_priority = 'critical'")
+    crit_hotspots = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT name, status, water_depth_cm FROM road_segments WHERE status != 'open'")
+    affected_roads = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    context = {
+        "active_sensors": sensor_rows,
+        "critical_hotspots": crit_hotspots,
+        "compromised_roads": affected_roads,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    result = query_groq_chat(
+        messages=req.messages,
+        api_key=req.api_key,
+        model=req.model or DEFAULT_MODEL,
+        context=context
+    )
+    return result
+
+
+@app.post("/api/ai/test-key")
+def test_groq_key(key: str = Body(..., embed=True)):
+    """Validates whether a provided Groq API key is active."""
+    headers = {
+        "Authorization": f"Bearer {key.strip()}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": "ping"}],
+        "max_tokens": 5
+    }
+    try:
+        res = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=5.0)
+        if res.status_code == 200:
+            return {"valid": True, "message": "Groq API key is valid and connected to Llama-3 inference!"}
+        else:
+            return {"valid": False, "message": f"Groq returned error {res.status_code}: {res.text}"}
+    except Exception as e:
+        return {"valid": False, "message": f"Connection error: {str(e)}"}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
