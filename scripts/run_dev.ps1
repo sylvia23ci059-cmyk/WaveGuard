@@ -9,7 +9,7 @@ $venvPython = Join-Path $rootDir ".venv\Scripts\python.exe"
 
 # 1. Start FastAPI Backend Server
 Write-Host "[1/2] Starting FastAPI Backend & WebSocket Server on port 8000..." -ForegroundColor Yellow
-$backendProcess = Start-Process -FilePath $venvPython -ArgumentList "-m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload" -WorkingDirectory $rootDir -PassThru
+$backendProcess = Start-Process -FilePath $venvPython -ArgumentList "-m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload" -WorkingDirectory "$rootDir\backend" -PassThru
 
 # 2. Start Frontend Dev Server
 Write-Host "[2/2] Starting Vite Frontend on port 5173..." -ForegroundColor Yellow

@@ -1,0 +1,240 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "project": "WAVEGUARD",
+    "region": "Bengaluru, Karnataka, India",
+    "description": "Inventory of vulnerable underpasses and low-lying road corridors for urban waterlogging monitoring",
+    "provenance": "OpenStreetMap & BBMP Flood Vulnerability Mapping (Demonstration Dataset)",
+    "crs": "EPSG:4326 (WGS 84)"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6983, 12.9554]
+      },
+      "properties": {
+        "id": "blr-loc-001",
+        "name": "Marathahalli Underpass",
+        "description": "Outer Ring Road (ORR) arterial underpass intersecting HAL Old Airport Road corridor.",
+        "category": "underpass",
+        "road_identifier": "ORR-EAST-UP01",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 35.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6226, 12.9176]
+      },
+      "properties": {
+        "id": "blr-loc-002",
+        "name": "Silk Board Junction Underpass",
+        "description": "Major southern interchange connecting Hosur Road, BTM Layout, and Outer Ring Road.",
+        "category": "underpass",
+        "road_identifier": "HSR-ORR-UP02",
+        "caution_threshold_cm": 18.0,
+        "closure_threshold_cm": 40.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5925, 13.0358]
+      },
+      "properties": {
+        "id": "blr-loc-003",
+        "name": "Hebbal Flyover & Underpass",
+        "description": "Northern gateway corridor connecting Bellary Road (NH 44), Outer Ring Road, and KIA Expressway.",
+        "category": "underpass",
+        "road_identifier": "NH44-ORR-UP03",
+        "caution_threshold_cm": 20.0,
+        "closure_threshold_cm": 45.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5684, 12.9818]
+      },
+      "properties": {
+        "id": "blr-loc-004",
+        "name": "Okalipuram 8-Track Underpass",
+        "description": "Subway complex near Krantivira Sangolli Rayanna (Majestic) Railway Station and Rajajinagar entrance.",
+        "category": "subway",
+        "road_identifier": "MAJ-RAJ-SB01",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 30.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6384, 12.9609]
+      },
+      "properties": {
+        "id": "blr-loc-005",
+        "name": "Domlur Underpass",
+        "description": "Key junction linking Old Airport Road, 100 Feet Road Indiranagar, and Inner Ring Road (IRR).",
+        "category": "underpass",
+        "road_identifier": "IRR-OAR-UP04",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 35.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5878, 12.9912]
+      },
+      "properties": {
+        "id": "blr-loc-006",
+        "name": "Le Meridien Underpass",
+        "description": "Railway underbridge on Sankey Road connecting Vasanth Nagar and High Grounds.",
+        "category": "underpass",
+        "road_identifier": "SNK-VNT-UP05",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 35.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5866, 12.9739]
+      },
+      "properties": {
+        "id": "blr-loc-007",
+        "name": "KR Circle Underpass",
+        "description": "Central civic junction connecting Nrupathunga Road, Sheshadri Road, and Cubbon Park.",
+        "category": "underpass",
+        "road_identifier": "KRC-CBD-UP06",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 30.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6271, 12.9348]
+      },
+      "properties": {
+        "id": "blr-loc-008",
+        "name": "Sony World Junction Low-Point",
+        "description": "Vulnerable commercial intersection along 100 Feet Road Koramangala & 80 Feet Road.",
+        "category": "intersection",
+        "road_identifier": "KOR-100FT-LP01",
+        "caution_threshold_cm": 16.0,
+        "closure_threshold_cm": 35.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6835, 12.9255]
+      },
+      "properties": {
+        "id": "blr-loc-009",
+        "name": "Bellandur Eco-Space Low-Point",
+        "description": "Outer Ring Road IT corridor depression zone prone to storm runoff backflow.",
+        "category": "arterial_lowpoint",
+        "road_identifier": "ORR-BLD-LP02",
+        "caution_threshold_cm": 20.0,
+        "closure_threshold_cm": 42.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5852, 12.9959]
+      },
+      "properties": {
+        "id": "blr-loc-010",
+        "name": "Windsor Manor Railway Underpass",
+        "description": "Palace Road railway subway linking Sankey Road and Bellary Road approaches.",
+        "category": "subway",
+        "road_identifier": "WM-RY-SB02",
+        "caution_threshold_cm": 15.0,
+        "closure_threshold_cm": 35.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5544, 12.9592]
+      },
+      "properties": {
+        "id": "blr-loc-011",
+        "name": "Sirsi Circle Flyover Ground Underpass",
+        "description": "Mysore Road corridor entry near KR Market connecting western arterial routes.",
+        "category": "underpass",
+        "road_identifier": "MYS-SRC-UP07",
+        "caution_threshold_cm": 18.0,
+        "closure_threshold_cm": 40.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6669, 13.0006]
+      },
+      "properties": {
+        "id": "blr-loc-012",
+        "name": "Tin Factory Subway & KR Puram",
+        "description": "Multi-modal transit bottleneck connecting Old Madras Road, Outer Ring Road, and Whitefield.",
+        "category": "subway",
+        "road_identifier": "OMR-KRP-SB03",
+        "caution_threshold_cm": 20.0,
+        "closure_threshold_cm": 45.0,
+        "is_active": true,
+        "verification_status": "DEMONSTRATION_VERIFIED",
+        "source": "OpenStreetMap & BBMP Vulnerability Survey"
+      }
+    }
+  ]
+}

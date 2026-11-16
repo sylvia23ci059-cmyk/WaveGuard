@@ -16,7 +16,8 @@
 # Open terminal 1
 cd "c:\Users\Sylvia Trinita\OneDrive\Desktop\wavegard"
 .\.venv\Scripts\activate
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+cd backend
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 API docs available at: `http://localhost:8000/docs`
 

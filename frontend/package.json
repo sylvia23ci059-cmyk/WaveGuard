@@ -1,5 +1,5 @@
 {
-  "name": "waveguard-kgf-frontend",
+  "name": "waveguard-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -14,6 +14,7 @@
     "maplibre-gl": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.5",
     "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {

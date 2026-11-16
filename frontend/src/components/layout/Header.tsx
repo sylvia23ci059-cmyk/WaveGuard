@@ -1,135 +1,165 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { UserRole } from '../../types';
 import {
-  CloudRain,
-  AlertTriangle,
-  MapPin,
-  Sparkles,
-  UserCheck,
-  Radio
+  ShieldAlert,
+  Bot,
+  Play,
+  Square,
+  RefreshCw,
+  Bell,
+  Activity
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 export const Header: React.FC = () => {
-  const {
-    weather,
-    userRole,
-    setUserRole,
-    isAiOpen,
-    setIsAiOpen,
-    sensors
-  } = useApp();
+  const { dashboardData, simulator, refreshAll, isCopilotOpen, setIsCopilotOpen, setActivePage, logout } = useApp();
+  const [actionLoading, setActionLoading] = React.useState(false);
 
-  const hasCritical = sensors.some(s => s.status === 'critical');
-  const hasWarning = sensors.some(s => s.status === 'warning');
+  const unackedAlerts = dashboardData?.recent_alerts?.filter(a => !a.is_acknowledged) || [];
 
-  let riskBadge = {
-    label: 'Moderate',
-    color: 'text-amber-400 border-amber-500/40 bg-amber-500/10'
+  const handleToggleSimulator = async () => {
+    setActionLoading(true);
+    try {
+      if (simulator?.is_running) {
+        await api.stopSimulator();
+      } else {
+        await api.startSimulator({ interval_seconds: 5, scenario: simulator?.active_scenario || 'MONSOON_SURGE' });
+      }
+      await refreshAll();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
   };
-  if (hasCritical) {
-    riskBadge = {
-      label: 'High Risk',
-      color: 'text-red-400 border-red-500/50 bg-red-500/10'
-    };
-  } else if (!hasWarning && weather?.precipitation_mm === 0) {
-    riskBadge = {
-      label: 'Low',
-      color: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10'
-    };
-  }
+
+  const handleStepPulse = async () => {
+    setActionLoading(true);
+    try {
+      await api.stepSimulator();
+      await refreshAll();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
-    <header className="h-16 bg-[#070b13]/90 backdrop-blur-md border-b border-navy-800/80 px-4 flex items-center justify-between z-30 shrink-0">
-      {/* Brand & Platform Identity */}
+    <header className="h-16 bg-slate-900 border-b border-slate-800 text-white flex items-center justify-between px-6 z-20 shadow-sm">
+      {/* Brand & Title */}
       <div className="flex items-center space-x-3">
-        {/* WaveGuard Stylized Blue Crest */}
-        <div className="flex items-center space-x-2.5">
-          <svg className="w-8 h-8 text-cyan-400" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 22C10 14 18 14 24 22C30 30 36 24 38 20" stroke="#00f2fe" strokeWidth="3.5" strokeLinecap="round" />
-            <path d="M6 28C11 22 17 22 22 28C27 34 33 29 36 26" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
-            <path d="M10 16C14 12 19 12 23 16C27 20 31 18 33 16" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-          </svg>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white font-sans flex items-center">
-              Wave<span className="text-white">Guard</span>
-            </h1>
-            <p className="text-[10px] text-slate-400 tracking-wide font-sans -mt-0.5">
-              Urban Flood Intelligence Platform
-            </p>
-          </div>
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center shadow-md">
+          <ShieldAlert className="w-6 h-6 text-white" />
         </div>
-
-        {/* Location Pill */}
-        <div className="hidden sm:flex items-center space-x-2 bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1.5 ml-3">
-          <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
-          <div className="leading-tight">
-            <div className="text-xs font-semibold text-white font-sans">Kolar Gold Fields (KGF)</div>
-            <div className="text-[10px] text-slate-400">Karnataka, India</div>
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="font-bold text-lg tracking-wider text-white">WAVEGUARD</span>
+            <span className="bg-cyan-900/80 text-cyan-300 text-[10px] font-semibold px-2 py-0.5 rounded border border-cyan-700/60 uppercase">
+              Bengaluru 3D
+            </span>
           </div>
+          <p className="text-[11px] text-slate-300 hidden md:block">
+            3D Urban Waterlogging Monitoring & Safe Route Guidance System
+          </p>
         </div>
       </div>
 
-      {/* Right Meteorological, Risk Status & AI Copilot */}
-      <div className="flex items-center space-x-2.5">
-        {/* Weather Card */}
-        <div className="hidden md:flex items-center space-x-2 bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1.5 text-xs">
-          <CloudRain className="w-4 h-4 text-cyan-400" />
-          <div className="leading-tight font-sans">
-            <div className="font-bold text-white font-mono">
-              {weather ? `${weather.temperature_c}°C` : '24.6°C'}
-            </div>
-            <div className="text-[10px] text-slate-400">
-              {weather?.precipitation_mm ? 'Light Rain' : 'Scattered Clouds'}
-            </div>
+      {/* Center status badges */}
+      <div className="hidden lg:flex items-center space-x-3 text-xs">
+        <div className="flex items-center space-x-1.5 px-3 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-300">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Pipeline: <strong className="text-white">SIMULATED DEMO</strong></span>
+        </div>
+
+        {dashboardData && (
+          <div className="flex items-center space-x-2 bg-slate-800/80 border border-slate-700 px-3 py-1 rounded">
+            <span className="text-emerald-400 font-medium">● {dashboardData.summary.normal_locations} Normal</span>
+            <span className="text-amber-400 font-medium">● {dashboardData.summary.caution_locations} Caution</span>
+            <span className="text-red-400 font-medium">● {dashboardData.summary.blocked_locations} Blocked</span>
           </div>
+        )}
+      </div>
+
+      {/* Right controls */}
+      <div className="flex items-center space-x-3">
+        {/* Simulator controls */}
+        <div className="flex items-center bg-slate-800 border border-slate-700 rounded-md p-1 space-x-1">
+          <button
+            onClick={handleToggleSimulator}
+            disabled={actionLoading}
+            title={simulator?.is_running ? 'Stop Simulation Loop' : 'Start Simulation Loop'}
+            className={`px-2.5 py-1 text-xs rounded font-medium flex items-center space-x-1.5 transition-colors ${
+              simulator?.is_running
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            {simulator?.is_running ? (
+              <>
+                <Square className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Pause</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Simulate</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleStepPulse}
+            disabled={actionLoading}
+            title="Step One Simulation Tick"
+            className="px-2 py-1 text-xs rounded font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
+          >
+            <Activity className="w-3.5 h-3.5" />
+          </button>
         </div>
 
-        {/* Today's Rainfall Card */}
-        <div className="hidden lg:flex flex-col bg-navy-900/80 border border-navy-700/80 rounded-xl px-3 py-1 text-xs leading-tight font-sans">
-          <span className="text-[10px] text-slate-400">Today's Rainfall</span>
-          <span className="font-bold text-white font-mono text-sm">
-            {weather ? `${weather.precipitation_mm} mm` : '18.4 mm'}
-          </span>
-        </div>
-
-        {/* Risk Level Badge */}
-        <div className={`flex items-center space-x-1.5 border rounded-xl px-3 py-1.5 text-xs font-sans font-semibold ${riskBadge.color}`}>
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
-          <div className="leading-tight">
-            <span className="text-[10px] text-slate-400 block font-normal">Risk Level</span>
-            <span className="font-bold">{riskBadge.label}</span>
-          </div>
-        </div>
-
-        {/* AI Copilot Button */}
+        {/* Refresh button */}
         <button
-          onClick={() => setIsAiOpen(!isAiOpen)}
-          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium border transition ${
-            isAiOpen
-              ? 'bg-cyan-500/20 text-cyan-glow border-cyan-500/50 glow-cyan'
-              : 'bg-navy-900/90 text-slate-300 border-navy-700 hover:text-white hover:border-cyan-500/40'
-          }`}
-          title="Toggle Groq AI Copilot"
+          onClick={() => refreshAll()}
+          title="Refresh Data"
+          className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <RefreshCw className="w-4 h-4" />
+        </button>
+
+        {/* Alerts Bell */}
+        <button
+          onClick={() => setActivePage('alerts')}
+          className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+          title="View Alerts"
+        >
+          <Bell className="w-4 h-4" />
+          {unackedAlerts.length > 0 && (
+            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center animate-bounce">
+              {unackedAlerts.length}
+            </span>
+          )}
+        </button>
+
+        {/* AI Assistant Drawer Button */}
+        <button
+          onClick={() => setIsCopilotOpen(!isCopilotOpen)}
+          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+            isCopilotOpen
+              ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-semibold shadow-sm'
+              : 'bg-slate-800 hover:bg-slate-700 text-cyan-300 border-cyan-800/80'
+          }`}
+        >
+          <Bot className="w-4 h-4" />
           <span className="hidden sm:inline">AI Copilot</span>
         </button>
 
-        {/* Role Switcher */}
-        <div className="hidden xl:flex items-center space-x-1.5 bg-navy-900/80 px-2.5 py-1.5 rounded-xl border border-navy-700">
-          <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
-          <select
-            value={userRole}
-            onChange={(e) => setUserRole(e.target.value as UserRole)}
-            className="bg-transparent text-xs text-white font-medium focus:outline-none cursor-pointer"
-          >
-            <option value="admin" className="bg-navy-900 text-white">Admin</option>
-            <option value="engineer" className="bg-navy-900 text-white">Engineer</option>
-            <option value="surveyor" className="bg-navy-900 text-white">Surveyor</option>
-            <option value="public" className="bg-navy-900 text-white">Public</option>
-          </select>
-        </div>
+        <button
+          onClick={logout}
+          className="px-3 py-1.5 rounded-md border border-slate-700 bg-slate-800 text-xs font-medium text-slate-200 transition hover:bg-slate-700 hover:text-white"
+        >
+          Log out
+        </button>
       </div>
     </header>
   );

@@ -1,269 +1,178 @@
 import {
-  KGFBoundaryFeature,
-  DEMProduct,
-  TerrainSampleResult,
-  Hotspot,
-  IoTStation,
-  DrainageReach,
-  Incident,
-  WeatherCurrent,
-  DatasetMetadata
+  DashboardSummaryData,
+  LocationItem,
+  WaterReading,
+  AlertItem,
+  RouteResponse,
+  GraphInfoResponse,
+  SimulatorStatus,
+  SystemSettings
 } from '../types';
 
-const API_BASE = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    let errorDetail = response.statusText;
+    try {
+      const errorJson = await response.json();
+      errorDetail = errorJson.detail || errorJson.message || JSON.stringify(errorJson);
+    } catch {
+      // ignore
+    }
+    throw new Error(errorDetail || `Request failed with HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
 
 export const api = {
-  // 1. Boundaries
-  async getKGFBoundary(): Promise<KGFBoundaryFeature> {
-    try {
-      const res = await fetch(`${API_BASE}/boundaries/kgf`);
-      if (!res.ok) throw new Error('Failed to fetch boundary');
-      return await res.json();
-    } catch (e) {
-      console.warn('Using local fallback for boundary:', e);
-      return {
-        type: 'Feature',
-        properties: {
-          name: 'Kolar Gold Field',
-          boundary_type: 'administrative',
-          crs: 'EPSG:4326',
-          area_sqkm: 442.8,
-          source: 'Karnataka GIS / Taluk.zip / Taluk Code 1912',
-          bbox: { west: 78.2271, south: 12.8580, east: 78.4751, north: 13.0829 },
-          centroid: { latitude: 12.965, longitude: 78.272 }
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [78.2271, 12.95], [78.26, 13.0829], [78.4751, 13.05],
-            [78.45, 12.8580], [78.28, 12.86], [78.2271, 12.95]
-          ]]
-        }
-      };
-    }
+  // Health
+  checkHealth: () => fetchJson<{ status: string; service: string }>('/health'),
+
+  // Dashboard
+  getDashboardSummary: () => fetchJson<DashboardSummaryData>('/dashboard/summary'),
+
+  // Locations
+  getLocations: (params?: { status?: string; category?: string; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.category) q.append('category', params.category);
+    if (params?.search) q.append('search', params.search);
+    const queryString = q.toString() ? `?${q.toString()}` : '';
+    return fetchJson<LocationItem[]>(`/locations${queryString}`);
   },
 
-  async getBoundaryLayers(): Promise<any> {
-    const res = await fetch(`${API_BASE}/boundaries/layers`);
-    return await res.json();
-  },
+  getLocationsGeoJSON: () => fetchJson<any>('/locations/geojson'),
 
-  // 2. Terrain & Hydrology
-  async getDEMProducts(): Promise<DEMProduct[]> {
-    try {
-      const res = await fetch(`${API_BASE}/terrain/products`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
+  getLocationById: (id: string) => fetchJson<LocationItem>(`/locations/${id}`),
 
-  async sampleTerrain(lat: number, lon: number): Promise<TerrainSampleResult> {
-    try {
-      const res = await fetch(`${API_BASE}/terrain/sample?lat=${lat}&lon=${lon}`);
-      return await res.json();
-    } catch (e) {
-      return {
-        in_study_area: true,
-        coordinates: { latitude: lat, longitude: lon },
-        elevation_m: 812.5,
-        slope_degrees: 1.8,
-        flow_accumulation_cells: 1420.0,
-        topographic_wetness_index: 8.4,
-        flood_susceptibility_score: 0.62,
-        susceptibility_category: 'High Susceptibility'
-      };
-    }
-  },
+  getLocationHistory: (id: string, limit: number = 30) =>
+    fetchJson<{ id: number; water_depth_cm: number; timestamp: string; source: string; validation_status: string }[]>(
+      `/locations/${id}/history?limit=${limit}`
+    ),
 
-  async getNaturalDrainage(): Promise<any> {
-    try {
-      const res = await fetch(`${API_BASE}/terrain/drainage`);
-      return await res.json();
-    } catch (e) {
-      return { type: 'FeatureCollection', features: [] };
-    }
-  },
-
-  async recalculateGIS(): Promise<any> {
-    const res = await fetch(`${API_BASE}/gis/recalculate`, { method: 'POST' });
-    return await res.json();
-  },
-
-  // 3. Susceptibility
-  async getSusceptibilityConfig(): Promise<any> {
-    const res = await fetch(`${API_BASE}/susceptibility/config`);
-    return await res.json();
-  },
-
-  async calculateCustomSusceptibility(weights: any): Promise<any> {
-    const res = await fetch(`${API_BASE}/susceptibility/calculate`, {
+  createLocation: (data: Partial<LocationItem>) =>
+    fetchJson<LocationItem>('/locations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(weights)
-    });
-    return await res.json();
+      body: JSON.stringify(data),
+    }),
+
+  updateLocation: (id: string, data: Partial<LocationItem>) =>
+    fetchJson<LocationItem>(`/locations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteLocation: (id: string) =>
+    fetchJson<{ success: boolean; message: string }>(`/locations/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Readings
+  getReadings: (params?: { location_id?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.location_id) q.append('location_id', params.location_id);
+    if (params?.limit) q.append('limit', params.limit.toString());
+    const queryString = q.toString() ? `?${q.toString()}` : '';
+    return fetchJson<WaterReading[]>(`/readings${queryString}`);
   },
 
-  // 4. Hotspots
-  async getHotspots(): Promise<Hotspot[]> {
-    try {
-      const res = await fetch(`${API_BASE}/hotspots`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
-
-  async updateHotspot(id: number, data: any): Promise<any> {
-    const res = await fetch(`${API_BASE}/hotspots/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return await res.json();
-  },
-
-  // 5. Sensors & Telemetry
-  async getSensors(): Promise<IoTStation[]> {
-    try {
-      const res = await fetch(`${API_BASE}/sensors`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
-
-  async getSensorHistory(id: number): Promise<any> {
-    const res = await fetch(`${API_BASE}/sensors/${id}/history`);
-    return await res.json();
-  },
-
-  async simulateSensorStep(scenario: string = 'convective_storm'): Promise<any> {
-    const res = await fetch(`${API_BASE}/sensors/simulate-step?scenario=${scenario}`, {
-      method: 'POST'
-    });
-    return await res.json();
-  },
-
-  // 6. Drainage
-  async getDrainageSegments(): Promise<DrainageReach[]> {
-    try {
-      const res = await fetch(`${API_BASE}/drainage/segments`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
-
-  // 7. Incidents & SOS
-  async getIncidents(): Promise<Incident[]> {
-    try {
-      const res = await fetch(`${API_BASE}/incidents`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
-
-  async createIncident(incident: any): Promise<any> {
-    const res = await fetch(`${API_BASE}/incidents`, {
+  submitReading: (data: { location_id: string; water_depth_cm: number; source?: string }) =>
+    fetchJson<any>('/readings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(incident)
-    });
-    return await res.json();
+      body: JSON.stringify(data),
+    }),
+
+  // Alerts
+  getAlerts: (params?: { acknowledged?: boolean; severity?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.acknowledged !== undefined) q.append('acknowledged', params.acknowledged.toString());
+    if (params?.severity) q.append('severity', params.severity);
+    if (params?.limit) q.append('limit', params.limit.toString());
+    const queryString = q.toString() ? `?${q.toString()}` : '';
+    return fetchJson<AlertItem[]>(`/alerts${queryString}`);
   },
 
-  async verifyIncident(id: number, status: string, assignedTeam?: string): Promise<any> {
-    const res = await fetch(`${API_BASE}/incidents/${id}/verify`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, assigned_team: assignedTeam })
-    });
-    return await res.json();
-  },
-
-  // 8. Roads & Rerouting
-  async getRoads(): Promise<any> {
-    try {
-      const res = await fetch(`${API_BASE}/roads`);
-      return await res.json();
-    } catch (e) {
-      return { type: 'FeatureCollection', features: [] };
-    }
-  },
-
-  async calculateSafeRoute(coords: { start_lat: number; start_lon: number; end_lat: number; end_lon: number }): Promise<any> {
-    const res = await fetch(`${API_BASE}/roads/route`, {
+  acknowledgeAlert: (id: number, acknowledgedBy: string = 'Admin Operator') =>
+    fetchJson<AlertItem>(`/alerts/${id}/acknowledge`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(coords)
-    });
-    return await res.json();
-  },
+      body: JSON.stringify({ acknowledged_by: acknowledgedBy }),
+    }),
 
-  async updateRoadStatus(id: number, status: string, reason?: string, depthCm: number = 0): Promise<any> {
-    const res = await fetch(`${API_BASE}/roads/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, reason, depth_cm: depthCm })
-    });
-    return await res.json();
-  },
+  // Routing
+  getRouteGraph: () => fetchJson<GraphInfoResponse>('/routes/graph'),
 
-  // 9. Weather
-  async getCurrentWeather(): Promise<WeatherCurrent> {
-    try {
-      const res = await fetch(`${API_BASE}/weather/current`);
-      return await res.json();
-    } catch (e) {
-      return {
-        location: 'Kolar Gold Fields (KGF), Karnataka',
-        latitude: 12.96,
-        longitude: 78.27,
-        timestamp: new Date().toISOString(),
-        temperature_c: 26.8,
-        relative_humidity_pct: 76,
-        precipitation_mm: 0.0,
-        wind_speed_kmh: 11.2,
-        weather_condition: 'Plateau Forecast Simulation',
-        source: 'Atmospheric Model'
-      };
-    }
-  },
-
-  async getRainfallHistory(): Promise<any> {
-    const res = await fetch(`${API_BASE}/weather/history`);
-    return await res.json();
-  },
-
-  // 10. Data Sources Registry
-  async getDatasets(): Promise<DatasetMetadata[]> {
-    try {
-      const res = await fetch(`${API_BASE}/datasets`);
-      return await res.json();
-    } catch (e) {
-      return [];
-    }
-  },
-
-  // 11. Groq AI Copilot
-  async sendAIChat(messages: { role: string; content: string }[], apiKey?: string, model?: string): Promise<any> {
-    const res = await fetch(`${API_BASE}/ai/chat`, {
+  calculateRoute: (data: { origin_node_id: string; destination_node_id: string; avoid_blocked?: boolean }) =>
+    fetchJson<RouteResponse>('/routes/calculate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, api_key: apiKey, model })
-    });
-    return await res.json();
-  },
+      body: JSON.stringify(data),
+    }),
 
-  async testGroqKey(key: string): Promise<any> {
-    const res = await fetch(`${API_BASE}/ai/test-key`, {
+  // Simulator
+  getSimulatorStatus: () => fetchJson<SimulatorStatus>('/simulator/status'),
+
+  startSimulator: (data?: { interval_seconds?: number; scenario?: string }) =>
+    fetchJson<SimulatorStatus>('/simulator/start', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key })
-    });
-    return await res.json();
-  }
+      body: JSON.stringify(data || {}),
+    }),
+
+  stopSimulator: () =>
+    fetchJson<SimulatorStatus>('/simulator/stop', {
+      method: 'POST',
+    }),
+
+  stepSimulator: () =>
+    fetchJson<any>('/simulator/step', {
+      method: 'POST',
+    }),
+
+  setSimulatorScenario: (scenarioName: string) =>
+    fetchJson<SimulatorStatus>('/simulator/scenario', {
+      method: 'POST',
+      body: JSON.stringify({ scenario_name: scenarioName }),
+    }),
+
+  injectManualReading: (data: { location_id: string; water_depth_cm: number; source?: string }) =>
+    fetchJson<any>('/simulator/manual-reading', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  resetDemoData: () =>
+    fetchJson<{ success: boolean; message: string; simulator_status: SimulatorStatus }>('/simulator/reset', {
+      method: 'POST',
+    }),
+
+  // AI Assistant
+  sendAIChat: (query: string, conversationHistory: { role: string; content: string }[] = []) =>
+    fetchJson<{
+      response: string;
+      provider: string;
+      model: string;
+      error_note?: string;
+      grounding_data?: any;
+    }>('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ query, conversation_history: conversationHistory }),
+    }),
+
+  // Settings
+  getSettings: () => fetchJson<SystemSettings>('/settings'),
+
+  updateSettings: (data: Partial<SystemSettings>) =>
+    fetchJson<SystemSettings>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 };

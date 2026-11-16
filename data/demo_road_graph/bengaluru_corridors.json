@@ -1,0 +1,284 @@
+{
+  "graph_id": "bengaluru-corridors-network-v1",
+  "name": "Bengaluru Arterial Road Network & Underpass Demonstration Graph",
+  "description": "Topological graph of major Bengaluru transport corridors for Dijkstra routing & flood detour calculation",
+  "crs": "EPSG:4326 (WGS 84)",
+  "nodes": [
+    { "id": "node-majestic", "name": "Majestic (KSR Railway Station)", "lat": 12.9781, "lng": 77.5701 },
+    { "id": "node-kr-circle", "name": "KR Circle / Vidhana Soudha", "lat": 12.9739, "lng": 77.5866 },
+    { "id": "node-windsor-manor", "name": "Windsor Manor / Sankey Rd", "lat": 12.9959, "lng": 77.5852 },
+    { "id": "node-hebbal", "name": "Hebbal Junction (NH 44 / ORR)", "lat": 13.0358, "lng": 77.5925 },
+    { "id": "node-mekhri-circle", "name": "Mekhri Circle (Bellary Rd / CV Raman)", "lat": 13.0076, "lng": 77.5833 },
+    { "id": "node-indiranagar", "name": "Indiranagar 100ft Road", "lat": 12.9784, "lng": 77.6408 },
+    { "id": "node-domlur", "name": "Domlur Flyover & Underpass", "lat": 12.9609, "lng": 77.6384 },
+    { "id": "node-marathahalli", "name": "Marathahalli ORR Underpass", "lat": 12.9554, "lng": 77.6983 },
+    { "id": "node-bellandur", "name": "Bellandur Eco-Space (ORR)", "lat": 12.9255, "lng": 77.6835 },
+    { "id": "node-silk-board", "name": "Central Silk Board Junction", "lat": 12.9176, "lng": 77.6226 },
+    { "id": "node-koramangala", "name": "Koramangala Sony World", "lat": 12.9348, "lng": 77.6271 },
+    { "id": "node-btm-layout", "name": "BTM Layout Ring Road", "lat": 12.9165, "lng": 77.6101 },
+    { "id": "node-jayanagar", "name": "Jayanagar 4th Block", "lat": 12.9299, "lng": 77.5824 },
+    { "id": "node-sirsi-circle", "name": "Sirsi Circle (Mysore Road)", "lat": 12.9592, "lng": 77.5544 },
+    { "id": "node-tin-factory", "name": "Tin Factory (KR Puram / OMR)", "lat": 13.0006, "lng": 77.6669 },
+    { "id": "node-whitefield", "name": "Whitefield (Hope Farm)", "lat": 12.9841, "lng": 77.7508 }
+  ],
+  "edges": [
+    {
+      "id": "edge-majestic-krcircle",
+      "from_node": "node-majestic",
+      "to_node": "node-kr-circle",
+      "name": "Sheshadri Road",
+      "distance_km": 2.1,
+      "associated_location_id": "blr-loc-007",
+      "coordinates": [
+        [77.5701, 12.9781],
+        [77.5780, 12.9760],
+        [77.5866, 12.9739]
+      ]
+    },
+    {
+      "id": "edge-majestic-windsormanor",
+      "from_node": "node-majestic",
+      "to_node": "node-windsor-manor",
+      "name": "Palace Road via Okalipuram",
+      "distance_km": 2.8,
+      "associated_location_id": "blr-loc-004",
+      "coordinates": [
+        [77.5701, 12.9781],
+        [77.5684, 12.9818],
+        [77.5852, 12.9959]
+      ]
+    },
+    {
+      "id": "edge-krcircle-windsormanor",
+      "from_node": "node-kr-circle",
+      "to_node": "node-windsor-manor",
+      "name": "Palace Guttahalli Arterial",
+      "distance_km": 2.7,
+      "associated_location_id": "blr-loc-006",
+      "coordinates": [
+        [77.5866, 12.9739],
+        [77.5878, 12.9912],
+        [77.5852, 12.9959]
+      ]
+    },
+    {
+      "id": "edge-windsormanor-mekhri",
+      "from_node": "node-windsor-manor",
+      "to_node": "node-mekhri-circle",
+      "name": "Sankey Road / Bellary Road",
+      "distance_km": 1.6,
+      "associated_location_id": "blr-loc-010",
+      "coordinates": [
+        [77.5852, 12.9959],
+        [77.5833, 13.0076]
+      ]
+    },
+    {
+      "id": "edge-mekhri-hebbal",
+      "from_node": "node-mekhri-circle",
+      "to_node": "node-hebbal",
+      "name": "Bellary Road Expressway",
+      "distance_km": 3.4,
+      "associated_location_id": "blr-loc-003",
+      "coordinates": [
+        [77.5833, 13.0076],
+        [77.5880, 13.0220],
+        [77.5925, 13.0358]
+      ]
+    },
+    {
+      "id": "edge-krcircle-domlur",
+      "from_node": "node-kr-circle",
+      "to_node": "node-domlur",
+      "name": "Cubbon Road to Old Airport Road",
+      "distance_km": 6.2,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.5866, 12.9739],
+        [77.6080, 12.9730],
+        [77.6250, 12.9680],
+        [77.6384, 12.9609]
+      ]
+    },
+    {
+      "id": "edge-domlur-indiranagar",
+      "from_node": "node-domlur",
+      "to_node": "node-indiranagar",
+      "name": "100 Feet Road Indiranagar",
+      "distance_km": 2.2,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.6384, 12.9609],
+        [77.6408, 12.9784]
+      ]
+    },
+    {
+      "id": "edge-indiranagar-tinfactory",
+      "from_node": "node-indiranagar",
+      "to_node": "node-tin-factory",
+      "name": "Old Madras Road (OMR)",
+      "distance_km": 4.1,
+      "associated_location_id": "blr-loc-012",
+      "coordinates": [
+        [77.6408, 12.9784],
+        [77.6550, 12.9900],
+        [77.6669, 13.0006]
+      ]
+    },
+    {
+      "id": "edge-domlur-marathahalli",
+      "from_node": "node-domlur",
+      "to_node": "node-marathahalli",
+      "name": "Old Airport Road Corridor",
+      "distance_km": 7.5,
+      "associated_location_id": "blr-loc-005",
+      "coordinates": [
+        [77.6384, 12.9609],
+        [77.6650, 12.9580],
+        [77.6983, 12.9554]
+      ]
+    },
+    {
+      "id": "edge-marathahalli-whitefield",
+      "from_node": "node-marathahalli",
+      "to_node": "node-whitefield",
+      "name": "Varthur Main Road / Whitefield Rd",
+      "distance_km": 6.8,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.6983, 12.9554],
+        [77.7250, 12.9650],
+        [77.7508, 12.9841]
+      ]
+    },
+    {
+      "id": "edge-marathahalli-bellandur",
+      "from_node": "node-marathahalli",
+      "to_node": "node-bellandur",
+      "name": "Outer Ring Road (Marathahalli - Bellandur)",
+      "distance_km": 4.5,
+      "associated_location_id": "blr-loc-001",
+      "coordinates": [
+        [77.6983, 12.9554],
+        [77.6920, 12.9380],
+        [77.6835, 12.9255]
+      ]
+    },
+    {
+      "id": "edge-bellandur-silkboard",
+      "from_node": "node-bellandur",
+      "to_node": "node-silk-board",
+      "name": "Outer Ring Road (Eco-Space to Silk Board)",
+      "distance_km": 6.1,
+      "associated_location_id": "blr-loc-009",
+      "coordinates": [
+        [77.6835, 12.9255],
+        [77.6550, 12.9200],
+        [77.6226, 12.9176]
+      ]
+    },
+    {
+      "id": "edge-domlur-koramangala",
+      "from_node": "node-domlur",
+      "to_node": "node-koramangala",
+      "name": "Inner Ring Road (IRR Ejipura)",
+      "distance_km": 3.8,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.6384, 12.9609],
+        [77.6310, 12.9450],
+        [77.6271, 12.9348]
+      ]
+    },
+    {
+      "id": "edge-koramangala-silkboard",
+      "from_node": "node-koramangala",
+      "to_node": "node-silk-board",
+      "name": "Koramangala 100ft Road to Hosur Road",
+      "distance_km": 2.6,
+      "associated_location_id": "blr-loc-008",
+      "coordinates": [
+        [77.6271, 12.9348],
+        [77.6240, 12.9250],
+        [77.6226, 12.9176]
+      ]
+    },
+    {
+      "id": "edge-silkboard-btm",
+      "from_node": "node-silk-board",
+      "to_node": "node-btm-layout",
+      "name": "Outer Ring Road (BTM Segment)",
+      "distance_km": 1.7,
+      "associated_location_id": "blr-loc-002",
+      "coordinates": [
+        [77.6226, 12.9176],
+        [77.6101, 12.9165]
+      ]
+    },
+    {
+      "id": "edge-btm-jayanagar",
+      "from_node": "node-btm-layout",
+      "to_node": "node-jayanagar",
+      "name": "Bannerghatta Rd / 11th Main Jayanagar",
+      "distance_km": 3.5,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.6101, 12.9165],
+        [77.5950, 12.9220],
+        [77.5824, 12.9299]
+      ]
+    },
+    {
+      "id": "edge-jayanagar-sirsicircle",
+      "from_node": "node-jayanagar",
+      "to_node": "node-sirsi-circle",
+      "name": "Lalbagh Fort Road to Mysore Road Entry",
+      "distance_km": 4.6,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.5824, 12.9299],
+        [77.5750, 12.9450],
+        [77.5544, 12.9592]
+      ]
+    },
+    {
+      "id": "edge-sirsicircle-majestic",
+      "from_node": "node-sirsi-circle",
+      "to_node": "node-majestic",
+      "name": "Mysore Road / City Market Corridor",
+      "distance_km": 3.1,
+      "associated_location_id": "blr-loc-011",
+      "coordinates": [
+        [77.5544, 12.9592],
+        [77.5620, 12.9680],
+        [77.5701, 12.9781]
+      ]
+    },
+    {
+      "id": "edge-tinfactory-marathahalli",
+      "from_node": "node-tin-factory",
+      "to_node": "node-marathahalli",
+      "name": "ORR North-East (KR Puram to Marathahalli)",
+      "distance_km": 5.9,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.6669, 13.0006],
+        [77.6850, 12.9780],
+        [77.6983, 12.9554]
+      ]
+    },
+    {
+      "id": "edge-hebbal-tinfactory",
+      "from_node": "node-hebbal",
+      "to_node": "node-tin-factory",
+      "name": "Outer Ring Road (Hebbal - Nagawara - KR Puram)",
+      "distance_km": 9.2,
+      "associated_location_id": null,
+      "coordinates": [
+        [77.5925, 13.0358],
+        [77.6300, 13.0250],
+        [77.6669, 13.0006]
+      ]
+    }
+  ]
+}

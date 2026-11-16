@@ -1,182 +1,268 @@
-# WAVEGUARD KGF
-## 3D Urban Flood Intelligence and Situational Awareness Platform
-**Study Area:** Kolar Gold Fields (KGF) Taluk, Karnataka, India  
-**Target Coordinate Reference Systems:** EPSG:32644 (WGS 84 / UTM zone 44N) & EPSG:4326 (WGS 84)
+# WAVEGUARD
+## 3D Urban Waterlogging Monitoring & Safe Route Guidance System
+**Geographical Focus:** Bengaluru, Karnataka, India  
+**Target Domain:** Smart City / Urban Infrastructure / GIS / IoT Telemetry  
+**License:** Open Academic Prototype License
 
 ---
 
-## 1. Executive Summary
+## Executive Summary
 
-**WaveGuard KGF** is an interactive, 3D geographical intelligence and urban flood situational awareness platform specifically engineered for Kolar Gold Fields (KGF), Karnataka.
+**WaveGuard** is an interactive 3D geospatial intelligence and safe detour guidance application engineered specifically for **Bengaluru, Karnataka, India**.
 
-Rather than presenting a generic dashboard with fabricated sensors, WaveGuard KGF integrates genuine geographical datasets, implements automated scientific terrain analysis (Horn slope gradients, multi-directional hillshade, D8 flow accumulation, depression analysis, Topographic Wetness Index), provides a configurable multi-factor flood susceptibility model, monitors IoT water-level sensor telemetry (with explicit *DEMONSTRATION DATA* labeling), performs differential drainage restriction diagnosis, and calculates safe road detours around verified flooded road segments.
+After intense pre-monsoon and monsoon downpours, stormwater rapidly accumulates in Bengaluru's subways, low-lying road depressions, and railway underpasses (e.g., Marathahalli, Silk Board, Hebbal, Okalipuram, KR Circle). Commercial navigation apps fail to provide verified underpass water depth readings, often leading drivers directly into flooded hazards.
 
----
+WaveGuard solves this problem by:
+1. Maintaining a persistent inventory of vulnerable Bengaluru underpasses with location-specific clearance thresholds.
+2. Continuously ingesting and validating water depth measurements.
+3. Automatically classifying roadway safety states: **NORMAL**, **CAUTION**, **CONFIRMED_BLOCKED**, or **UNKNOWN**.
+4. Rendering an interactive 3D digital twin map with building extrusions and status markers.
+5. Utilizing a deterministic **NetworkX Dijkstra algorithm** to guide commuters through safe alternative detours around blocked underpass segments.
+6. Providing an optional **Groq AI Assistant** grounded directly in real database telemetry.
 
-## 2. Platform Architecture & Technology Stack
-
-```mermaid
-flowchart TD
-    subgraph Data ["Authoritative Data Ingestion"]
-        BND["KGF Taluk Boundary (GPKG / GeoJSON)<br/>Taluk Code: 1912 (LGD 7002)"]
-        DEM["Copernicus DEM GLO-30 (30m DSM)<br/>Tiles: N12E078 & N13E078 Mosaic"]
-        OSM["OpenStreetMap QuickOSM / Overpass<br/>Roads, Waterways, Drains, Buildings"]
-        RAIN["IMD 0.25° Daily Series + Open-Meteo Live API"]
-        LULC["ISRO NRSC Bhuvan & Sentinel-2 Urban LULC"]
-    end
-
-    subgraph Backend ["FastAPI Geospatial Analytical Engine"]
-        API["FastAPI REST & WebSocket Server"]
-        DB[("Database: SQLite Local Engine<br/>PostgreSQL / PostGIS Target")]
-        TOPO["Horn Slope (°) & Hillshade"]
-        HYDRO["D8 Flow Direction & Flow Accumulation"]
-        DEP["Hydrological Fill & Depression Depth Matrix"]
-        TWI["Topographic Wetness Index ln(a / tan β)"]
-        MCE["Explainable Multi-Factor Weighted Overlay"]
-        ROUTE["Safe Road Detour Rerouting (Dijkstra)"]
-    end
-
-    subgraph IoT ["IoT Telemetry Gateway"]
-        ESP["ESP32 Microcontrollers (Ultrasonic, Rain)"]
-        SIM["Scenario Injector (Tagged: DEMONSTRATION DATA)"]
-    end
-
-    subgraph Frontend ["WaveGuard KGF Command Center (React 19 + TS + Tailwind)"]
-        MAP["MapLibre GL JS 2D/3D + Terrain Mesh + 3D Buildings"]
-        WS["Real-Time WebSocket Client (/ws/telemetry)"]
-        P1["1. Overview Dashboard"]
-        P2["2. 3D KGF Map Digital Twin"]
-        P3["3. Flood Susceptibility Analysis"]
-        P4["4. Terrain & Hydrology Analysis"]
-        P5["5. Hotspot Explorer"]
-        P6["6. Sensor Monitoring Fleet"]
-        P7["7. Drainage Intelligence"]
-        P8["8. Live Incidents & SOS Triage"]
-        P9["9. Road Safety & Rerouting"]
-        P10["10. Historical Analysis"]
-        P11["11. Data Sources & Provenance"]
-        P12["12. Settings & Admin (RBAC)"]
-    end
-
-    Data --> Backend
-    IoT --> Backend
-    Backend <==>|REST JSON & WebSockets| Frontend
-```
+> **Important Disclosure:** This college prototype uses a **simulated data pipeline** for testing and demonstration. Physical ESP32 microcontrollers and ultrasonic transducers are planned for future field deployment.
 
 ---
 
-## 3. The 12 Platform Modules
+## Table of Contents
 
-1. **Overview Dashboard**: Executive situational awareness summary, active warning status, real-time weather metrics, live mini-map, priority vulnerability feed, and IoT station fleet quick-glance.
-2. **3D KGF Map Digital Twin**: High-performance MapLibre GL JS 2D/3D map with perspective tilt, search bar jumping to KGF localities (Robertsonpet, Andersonpet, Champion Reefs, etc.), clickable scientific terrain probe, and 16 toggleable layers with legends.
-3. **Flood Susceptibility Analysis**: Explainable Multi-Criteria Evaluation (MCE) weighted overlay model ($S = \sum w_i f_i(x)$) with live interactive weight sliders, normalization methods, class distribution breakdown (Low, Moderate, High, Very High), and CSV export.
-4. **Terrain and Hydrology Analysis**: Elevation distribution (754.4m - 913.9m AMSL), Horn's slope in degrees, multi-directional hillshade, D8 flow accumulation, depression depth, and Topographic Wetness Index ($TWI = \ln(a / \tan \beta)$) with documented limitations.
-5. **Hotspot Explorer**: Searchable and filterable candidate inundation hotspots (Andersonpet South Culvert, Robertsonpet Market Swarna Nallah, Champion Reefs Railway Underpass, Oorgaum Tailings Basin, etc.) with coordinates, elevation, slope, and field verification updater.
-6. **Sensor Monitoring Fleet**: Real-time IoT station fleet monitoring (water depth, rainfall, battery MPPT health, RSSI signal), 24h hydrograph curves, warning/critical thresholds, and scenario simulation injection (`convective_storm`, `drainage_subsidence`, `normal_baseflow`). Explicitly tagged **DEMONSTRATION DATA**.
-7. **Drainage Intelligence**: Multi-node differential hydraulic analysis comparing upstream vs downstream heads to detect potential bottlenecks, restrictions, or channel capacity overtopping.
-8. **Live Incidents & SOS Triage**: Citizen incident submission portal with GPS geolocation, description, and photo support. Reports are logged as *unverified* with explicit instructions for life-threatening emergencies to call 112 directly. Authority verification actions available for admin users.
-9. **Road Safety & Safe Detour Routing**: Dynamic route planning between KGF landmarks, calculating safe detours that bypass submerged underpasses and flooded road segments.
-10. **Historical Analysis**: Historical IMD 0.25° gridded daily rainfall series and verified historical flood occurrences archive (2020, 2022, 2023).
-11. **Data Sources & Provenance Registry**: Comprehensive metadata registry for Copernicus GLO-30, Karnataka Taluk boundary, OpenStreetMap, IMD Rainfall, and NRSC Bhuvan, detailing CRS, spatial resolution, licensing, and limitations, plus a manual file import modal.
-12. **Settings & Administration**: Role-Based Access Control (RBAC) switcher (Chief Disaster Admin, Drainage Engineer, Field Surveyor, Public Resident), sensor registration form, threshold calibration, and platform audit log.
-
----
-
-## 4. Scientific Foundations & Data Integrity Principles
-
-- **Copernicus DEM GLO-30 DSM Notice:** The Copernicus DEM is a Digital Surface Model (DSM) reflecting tree canopy and structures, not a bare-earth terrain model. It is utilized for regional screening, not sub-meter underpass depths.
-- **Administrative vs Hydrological Boundaries:** The supplied KGF polygon is the administrative taluk boundary. Catchments extend beyond this boundary; an upstream analysis buffer is provided.
-- **Susceptibility vs Prediction:** Flood susceptibility describes relative static geographical tendency to accumulate runoff. It is not an uncalibrated hydrodynamic flood forecast.
-- **Unverified Field Study Zones:** Locations such as Champion Reefs, Robertsonpet, Andersonpet, Oorgaum, and Nundydurg are designated as initial screening study zones, promoted to confirmed hotspots only upon empirical ground-truthing.
-- **Simulated IoT Transparency:** All synthetic sensor values are prominently watermarked **DEMONSTRATION DATA**.
-- **No Remote Telemetry Without Uplink:** Physical ESP32 nodes process alarms locally on-site; offline nodes cannot transmit live telemetry without an operational communication channel.
+1. [Prerequisites](#1-prerequisites)
+2. [Python Installation Guidance](#2-python-installation-guidance)
+3. [Node.js & npm Installation Guidance](#3-nodejs--npm-installation-guidance)
+4. [How to Open the Project in Visual Studio Code](#4-how-to-open-the-project-in-visual-studio-code)
+5. [How to Create a Python Virtual Environment](#5-how-to-create-a-python-virtual-environment)
+6. [How to Install Backend Dependencies](#6-how-to-install-backend-dependencies)
+7. [How to Install Frontend Dependencies](#7-how-to-install-frontend-dependencies)
+8. [How to Initialize the Database](#8-how-to-initialize-the-database)
+9. [How to Configure the Groq AI Assistant](#9-how-to-configure-the-groq-ai-assistant)
+10. [How to Run the Backend Service](#10-how-to-run-the-backend-service)
+11. [How to Run the Frontend Service](#11-how-to-run-the-frontend-service)
+12. [One-Click Startup with Windows Batch File](#12-one-click-startup-with-windows-batch-file)
+13. [How to Use the Telemetry Simulator](#13-how-to-use-the-telemetry-simulator)
+14. [How to Test Dijkstra Detour Routing](#14-how-to-test-dijkstra-detour-routing)
+15. [Running Automated Test Suites](#15-running-automated-test-suites)
+16. [Troubleshooting Guide](#16-troubleshooting-guide)
 
 ---
 
-## 5. Getting Started & Execution
+## 1. Prerequisites
 
-### 1. Requirements
-- Node.js v18+ & npm
-- Python 3.11+ (Python 3.14 virtual environment included in `.venv/`)
+Before running WaveGuard on Windows 10 or 11, verify that you have:
+- **Operating System:** Windows 10/11 (64-bit).
+- **Python:** Version 3.11 or later.
+- **Node.js:** Version 18.0 or later (Node.js 20+ LTS recommended).
+- **Browser:** Modern Chromium-based browser (Chrome, Edge, Brave) or Firefox with WebGL enabled.
+- **Editor:** Visual Studio Code.
 
-### 2. Launching with Dev Script
+---
+
+## 2. Python Installation Guidance
+
+1. Download the official installer from [Python.org Downloads](https://www.python.org/downloads/).
+2. Run the installer.
+3. **CRITICAL:** Check the box **"Add python.exe to PATH"** on the very first installer screen before clicking "Install Now".
+4. Open PowerShell or Command Prompt and verify:
+   ```powershell
+   python --version
+   ```
+
+---
+
+## 3. Node.js & npm Installation Guidance
+
+1. Download the Node.js LTS installer from [Nodejs.org](https://nodejs.org/).
+2. Follow standard installer prompts with default settings.
+3. Open PowerShell or Command Prompt and verify:
+   ```powershell
+   node --version
+   npm --version
+   ```
+
+---
+
+## 4. How to Open the Project in Visual Studio Code
+
+1. Launch Visual Studio Code.
+2. Click **File** → **Open Folder...** (or press `Ctrl + K, Ctrl + O`).
+3. Select the `WaveGuard` directory.
+4. Open the integrated terminal in VS Code using ``Ctrl + ` `` or **Terminal** → **New Terminal**.
+
+---
+
+## 5. How to Create a Python Virtual Environment
+
+In the root project directory:
 ```powershell
-# PowerShell
-.\scripts\run_dev.ps1
+# Create the virtual environment
+python -m venv .venv
 
-# Or Windows Command Prompt
-scripts\run_dev.bat
+# Activate the virtual environment in PowerShell
+.\.venv\Scripts\Activate.ps1
 ```
+*(If PowerShell displays an Execution Policy restriction, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first).*
 
-### 3. Manual Startup
-**Backend API:**
+---
+
+## 6. How to Install Backend Dependencies
+
+With `.venv` activated:
 ```powershell
-.\.venv\Scripts\activate
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
 ```
-Open API Swagger Docs: `http://localhost:8000/docs`
 
-**Frontend Web App:**
+---
+
+## 7. How to Install Frontend Dependencies
+
+Navigate into the `frontend` folder and run:
+```powershell
+cd frontend
+npm install
+cd ..
+```
+
+---
+
+## 8. How to Initialize the Database
+
+WaveGuard uses SQLite with SQLAlchemy ORM. Initialize the database schema and seed authentic demonstration locations with:
+```powershell
+.\.venv\Scripts\python.exe scripts/initialize_database.py
+```
+This creates `waveguard.db` and populates 12 vulnerable underpass locations across Bengaluru (Marathahalli, Silk Board, Hebbal, Okalipuram, etc.) with road network segments.
+
+To reset the database at any time back to a clean baseline state:
+```powershell
+.\.venv\Scripts\python.exe scripts/reset_demo_data.py
+```
+
+---
+
+## 9. How to Configure the Groq AI Assistant
+
+WaveGuard includes an optional data-grounded AI copilot powered by Groq.
+
+1. Open `backend/.env` (or copy from `backend/.env.example`):
+   ```ini
+   PROJECT_NAME="WAVEGUARD - 3D Urban Waterlogging Monitoring & Safe Route Guidance"
+   ENVIRONMENT="development"
+   PORT=8000
+   DATABASE_URL="sqlite:///./waveguard.db"
+   CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
+   FRESHNESS_WINDOW_MINUTES=30
+   GROQ_API_KEY="your_groq_api_key_here"
+   GROQ_MODEL="openai/gpt-oss-120b"
+   SIMULATOR_INTERVAL_SECONDS=5
+   ```
+2. Paste your Groq API key in `GROQ_API_KEY`.
+3. If no key is provided, WaveGuard continues to function 100% normally and seamlessly engages its intelligent, grounded local rule-based response engine.
+
+---
+
+## 10. How to Run the Backend Service
+
+In a terminal window from the project root:
+```powershell
+cd backend
+..\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+- **Backend API URL:** `http://127.0.0.1:8000`
+- **Interactive Swagger Documentation:** `http://127.0.0.1:8000/docs`
+- **Health Check Endpoint:** `http://127.0.0.1:8000/api/health`
+
+---
+
+## 11. How to Run the Frontend Service
+
+In a separate terminal window:
 ```powershell
 cd frontend
 npm run dev
 ```
-Open Browser: `http://localhost:5173`
+The Vite development server will start at:
+- **Web App URL:** `http://localhost:5173`
 
-### 4. Running Unit Tests
-```powershell
-.\.venv\Scripts\activate
-python -m unittest tests/test_pipeline.py
-```
-All 7 unit tests validate spatial boundary ingestion, topographic calculations, TWI, susceptibility overlay, IoT thresholds, and routing logic.
+Open `http://localhost:5173` in your web browser.
 
 ---
 
-## 6. Project Structure
+## 12. One-Click Startup with Windows Batch File
 
+For maximum ease of use on Windows, double-click the included batch file:
 ```
-waveguard-kgf/
-  .venv/                      # Python 3.14 virtual environment
-  backend/
-    main.py                   # FastAPI REST API & WebSocket server
-  frontend/
-    src/
-      components/layout/      # Header, Sidebar, Navigation
-      components/map/         # MapLibre GL 2D/3D map & LayerControlPanel
-      context/                # Global AppContext & WebSocket state
-      pages/                  # 12 platform application pages
-      services/               # API client with offline fallback
-      types/                  # TypeScript interface definitions
-      App.tsx
-      main.tsx
-      index.css               # Cyber-GIS styling & animations
-    package.json
-    vite.config.ts
-    tailwind.config.js
-  data/
-    boundaries/               # KGF_Taluk_Boundary.gpkg & WGS84 GeoJSON
-    dem/                      # Copernicus DEM GLO-30 tile metadata
-    rainfall/                 # IMD rainfall records
-    landcover/                # Bhuvan & Sentinel-2 land cover
-    roads/                    # OpenStreetMap road centerlines
-    drainage/                 # Mapped nallahs & stream channels
-    historical_floods/        # Verified flood incident records
-    processed/                # Processed DEM, slope, hillshade, TWI, drainage GeoJSON
-    field_survey/             # Field inspection records
-  database/
-    schema.sql                # Complete relational spatial schema
-    db.py                     # SQLite / PostGIS manager & seed data
-  gis/
-    terrain_engine.py         # Horn slope, D8 flow direction, TWI, susceptibility
-  documentation/
-    ARCHITECTURE_AND_SPECS.md # Detailed system architecture & schema
-    API_REFERENCE.md          # REST & WebSocket endpoint specification
-    OPERATIONAL_GUIDE.md      # Deployment & ESP32 hardware guide
-  scripts/
-    run_dev.ps1               # 1-click PowerShell dev launch script
-    run_dev.bat               # 1-click Windows batch launch script
-  tests/
-    test_pipeline.py          # Unit & integration test suite
-  .env.example                # Environment variable configuration
-  README.md                   # Platform documentation
+start_waveguard.bat
 ```
+This launcher automatically:
+1. Verifies Python and Node.js.
+2. Initializes the SQLite database schema if needed.
+3. Launches the FastAPI backend in one dedicated terminal window.
+4. Launches the Vite React frontend in a second terminal window.
+5. Displays direct browser links.
+
+---
+
+## 13. How to Use the Telemetry Simulator
+
+1. Navigate to **Water Monitoring** in the sidebar.
+2. Click **Start Engine** to begin the background simulation loop (updates every 5 seconds).
+3. Test various storm scenarios:
+   - **Dry Weather:** All underpasses clear (0 – 3 cm, `NORMAL`).
+   - **Light Showers:** Minor water accumulation (5 – 12 cm).
+   - **Monsoon Surge:** Acute rainfall; **Marathahalli Underpass** (40+ cm) and **Silk Board Underpass** (45+ cm) transition to **CONFIRMED_BLOCKED**.
+   - **Cloudburst Surge:** Citywide inundation of subways and arterial low-points.
+   - **Pump Drainage:** Storm pumps active; depths drop back toward normal clearance.
+4. Use **Manual Water Depth Entry** to inject custom test readings into any specific underpass.
+
+---
+
+## 14. How to Test Dijkstra Detour Routing
+
+1. In the sidebar, open **Route Guidance**.
+2. Select an origin and destination (e.g., **Domlur** to **Central Silk Board**).
+3. Ensure **"Avoid CONFIRMED_BLOCKED roads"** is checked.
+4. Click **Calculate Safe Transit Route**:
+   - When **Marathahalli** or **Silk Board** is flooded (`BLOCKED`), the routing engine omits the blocked highway segment and automatically calculates a safe detour (e.g., via Koramangala 100ft Road / Inner Ring Road).
+   - The map visually highlights the **Safe Route** in solid cyan and the **Avoided Blocked Road** in dashed red.
+   - The system displays total distance, step-by-step corridor names, and a plain-English explanation.
+
+---
+
+## 15. Running Automated Test Suites
+
+WaveGuard includes full automated test coverage for backend APIs, routing, classification, simulation, and frontend production compilation:
+
+```powershell
+# 1. Run Backend Pytest Suite
+.\.venv\Scripts\python.exe -m pytest backend/tests -v
+
+# 2. Run Frontend Production TypeScript Build
+cd frontend
+npm run build
+```
+
+---
+
+## 16. Troubleshooting Guide
+
+### Port 8000 or 5173 Already in Use
+If another application is using port 8000 or 5173:
+```powershell
+# Find process using port 8000
+netstat -ano | findstr :8000
+# Kill the process by PID
+taskkill /F /PID <PID_NUMBER>
+```
+
+### Map Renders Blank or Tiles Fail to Load
+- Ensure your computer is connected to the internet to load OpenFreeMap vector tiles on first load.
+- If OpenFreeMap is blocked by your firewall or offline, the application displays an informative notification banner while preserving all coordinates, markers, routing calculations, and dashboard data.
+
+### Virtual Environment Activation Blocked
+If Windows PowerShell reports an execution policy error:
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+### Groq API Rate Limit or Network Error
+WaveGuard is engineered with a fail-safe fallback. If the Groq API key is invalid, missing, or rate-limited, the system automatically engages its local grounded rule-based engine, answering questions accurately based on current SQLite database records without crashing.

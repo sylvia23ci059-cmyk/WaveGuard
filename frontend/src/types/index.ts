@@ -1,191 +1,160 @@
-export type UserRole = 'public' | 'surveyor' | 'engineer' | 'admin';
+export type LocationStatus = 'NORMAL' | 'CAUTION' | 'BLOCKED' | 'UNKNOWN';
 
-export interface BoundingBox {
-  west: number;
-  south: number;
-  east: number;
-  north: number;
-}
-
-export interface KGFBoundaryFeature {
-  type: 'Feature';
-  properties: {
-    name: string;
-    boundary_type: string;
-    crs: string;
-    area_sqkm: number;
-    source: string;
-    bbox: BoundingBox;
-    centroid: {
-      latitude: number;
-      longitude: number;
-    };
-  };
-  geometry: any;
-}
-
-export interface DEMProduct {
-  id: number;
-  layer_type: 'elevation' | 'slope' | 'hillshade' | 'flow_accumulation' | 'twi' | 'depressions' | 'susceptibility';
-  file_path: string;
-  grid_width: number;
-  grid_height: number;
-  cell_size_m: number;
-  min_value: number;
-  max_value: number;
-  mean_value: number;
-  unit: string;
-  crs: string;
-}
-
-export interface TerrainSampleResult {
-  in_study_area: boolean;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
-  elevation_m?: number;
-  slope_degrees?: number;
-  flow_accumulation_cells?: number;
-  catchment_area_upstream_ha?: number;
-  topographic_wetness_index?: number;
-  flood_susceptibility_score?: number;
-  susceptibility_category?: string;
-  scientific_disclaimer?: string;
-  message?: string;
-}
-
-export interface Hotspot {
-  id: number;
-  hotspot_code: string;
+export interface LocationItem {
+  id: string;
   name: string;
+  description?: string;
   latitude: number;
   longitude: number;
-  elevation_m: number;
-  slope_deg: number;
-  flow_accum_pixels: number;
-  catchment_area_ha: number;
-  nearby_drainage_type: string;
-  historical_evidence: string;
-  verification_status: 'unverified' | 'field_surveyed' | 'confirmed_hotspot' | 'rejected';
-  inspection_priority: 'critical' | 'high' | 'medium' | 'low';
-  susceptibility_score: number;
-  confidence_score: number;
-  recommended_action: string;
+  category: string;
+  road_identifier?: string;
+  caution_threshold_cm: number;
+  closure_threshold_cm: number;
+  is_active: boolean;
+  verification_status: string;
+  current_status: LocationStatus;
+  current_water_depth_cm: number;
+  last_reading_time?: string | null;
+  source_info: string;
+  sensor_installed?: boolean;
+  sensor_status?: string;
   created_at?: string;
   updated_at?: string;
 }
 
-export interface IoTStation {
+export interface WaterReading {
   id: number;
-  station_code: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  channel_name: string;
-  installation_type: 'nallah_bridge' | 'culvert' | 'underpass' | 'storm_channel' | 'weather_station';
-  is_simulated: boolean;
-  provenance_label: 'DEMONSTRATION DATA' | 'FIELD_HARDWARE';
-  warning_threshold_m: number;
-  critical_threshold_m: number;
-  max_channel_depth_m: number;
-  current_water_level_m: number;
-  current_rainfall_mm: number;
-  battery_pct: number;
-  signal_rssi: number;
-  status: 'online' | 'warning' | 'critical' | 'offline' | 'maintenance';
-  last_seen: string;
+  location_id: string;
+  location_name?: string;
+  water_depth_cm: number;
+  timestamp: string;
+  source: string;
+  validation_status: string;
+  validation_note?: string;
 }
 
-export interface DrainageReach {
+export interface AlertItem {
   id: number;
-  reach_name: string;
-  upstream_station: string;
-  downstream_station: string;
-  upstream_level_m: number;
-  downstream_level_m: number;
-  differential_head_m: number;
-  status: 'normal' | 'rising_water' | 'possible_restriction' | 'possible_overflow' | 'sensor_fault' | 'insufficient_information';
-  diagnosis_notes: string;
+  location_id: string;
+  location_name?: string;
+  alert_type: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  description: string;
+  timestamp: string;
+  is_acknowledged: boolean;
+  acknowledged_at?: string | null;
+  acknowledged_by?: string | null;
+}
+
+export interface SimulatorStatus {
+  is_running: boolean;
+  interval_seconds: number;
+  readings_generated_count: number;
+  active_scenario: string;
+  last_tick_time?: string | null;
+  data_source_mode: string;
+}
+
+export interface DashboardSummaryData {
+  summary: {
+    total_locations: number;
+    normal_locations: number;
+    caution_locations: number;
+    blocked_locations: number;
+    unknown_locations: number;
+  };
+  distribution: {
+    NORMAL: number;
+    CAUTION: number;
+    BLOCKED: number;
+    UNKNOWN: number;
+  };
+  recent_readings: WaterReading[];
+  recent_alerts: AlertItem[];
+  last_system_update: string;
+  simulator: SimulatorStatus;
+  data_source_indicator: {
+    mode: string;
+    disclosure: string;
+    study_area: string;
+  };
+}
+
+export interface GraphNode {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+}
+
+export interface GraphEdge {
+  id: string;
+  from_node: string;
+  to_node: string;
+  name: string;
+  distance_km: number;
+  associated_location_id?: string | null;
+  status: string;
+  coordinates: number[][];
+}
+
+export interface GraphInfoResponse {
+  graph_id: string;
+  name: string;
+  description: string;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
+export interface RouteSegmentDetail {
+  edge_id: string;
+  from_node: string;
+  to_node: string;
+  name: string;
+  distance_km: number;
+  status: string;
+  associated_location_id?: string | null;
+  associated_location_name?: string | null;
+  water_depth_cm?: number | null;
+  coordinates: number[][];
+}
+
+export interface RouteResponse {
+  success: boolean;
+  path_nodes: string[];
+  total_distance_km: number;
+  segments: RouteSegmentDetail[];
+  blocked_segments_avoided: any[];
+  caution_segments_included: any[];
+  is_safe: boolean;
+  explanation: string;
+  geometry_geojson: {
+    type: string;
+    features: any[];
+  };
   disclaimer: string;
 }
 
-export interface Incident {
-  id: number;
-  incident_number: string;
-  category: 'waterlogging' | 'blocked_drain' | 'road_impassable' | 'infrastructure_damage' | 'emergency_sos';
-  title: string;
-  description: string;
-  latitude: number;
-  longitude: number;
-  location_name: string;
-  reporter_type: 'citizen' | 'field_engineer' | 'sensor_automated';
-  reporter_contact?: string;
-  verification_status: 'unverified' | 'investigating' | 'verified' | 'resolved' | 'false_alarm';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  photo_url?: string;
-  reported_at: string;
-  verified_at?: string;
-  assigned_team?: string;
+export interface SystemSettings {
+  project_name: string;
+  version: string;
+  environment: string;
+  database_url: string;
+  freshness_window_minutes: number;
+  simulator_interval_seconds: number;
+  groq_configured: boolean;
+  groq_key_preview: string;
+  groq_model: string;
+  data_source_mode: string;
+  study_area: string;
 }
 
-export interface RoadSegmentFeature {
-  type: string;
-  id: number;
-  properties: {
-    name: string;
-    osm_id: string;
-    highway_type: string;
-    status: 'open' | 'caution' | 'waterlogged' | 'closed';
-    water_depth_cm: number;
-    closure_reason?: string;
-  };
-  geometry: any;
-}
-
-export interface WeatherCurrent {
-  location: string;
-  latitude: number;
-  longitude: number;
+export interface AIChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
   timestamp: string;
-  temperature_c: number;
-  relative_humidity_pct: number;
-  precipitation_mm: number;
-  wind_speed_kmh: number;
-  weather_condition: string;
-  source: string;
-}
-
-export interface DatasetMetadata {
-  id: number;
-  dataset_code: string;
-  title: string;
-  provider: string;
-  url: string;
-  download_date: string;
-  spatial_resolution: string;
-  crs: string;
-  temporal_coverage: string;
-  limitations: string;
-  processing_history: string;
-  status: string;
-}
-
-export interface MapLayerState {
-  baseMap: boolean;
-  satellite: boolean;
-  buildings3d: boolean;
-  terrainElevation: boolean;
-  hillshade: boolean;
-  slope: boolean;
-  flowAccumulation: boolean;
-  naturalDrainage: boolean;
-  mappedDrainage: boolean;
-  floodSusceptibility: boolean;
-  rainfall: boolean;
-  waterSensors: boolean;
-  roadWaterlogging: boolean;
-  roadClosures: boolean;
-  emergencySos: boolean;
-  proposedSensors: boolean;
+  provider?: string;
+  model?: string;
+  error_note?: string;
 }

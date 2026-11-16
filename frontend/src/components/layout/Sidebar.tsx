@@ -1,74 +1,94 @@
 import React from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, NavPage } from '../../context/AppContext';
 import {
-  Box,
-  BarChart3,
-  Radio,
+  LayoutDashboard,
+  Map,
+  MapPin,
+  Droplets,
   AlertTriangle,
-  GitFork,
-  FileText,
-  Layers,
-  Settings
+  Navigation,
+  Bot,
+  Settings,
+  Waves
 } from 'lucide-react';
 
-interface RailItem {
-  id: string;
+interface NavItem {
+  id: NavPage;
   label: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
 }
 
 export const Sidebar: React.FC = () => {
-  const { activePage, setActivePage } = useApp();
+  const { activePage, setActivePage, dashboardData } = useApp();
 
-  const railItems: RailItem[] = [
-    { id: 'map3d', label: '3D Map', icon: Box },
-    { id: 'susceptibility', label: 'Analysis', icon: BarChart3 },
-    { id: 'sensors', label: 'Sensors', icon: Radio },
-    { id: 'incidents', label: 'Incidents', icon: AlertTriangle },
-    { id: 'routing', label: 'Routing', icon: GitFork },
-    { id: 'hotspots', label: 'Reports', icon: FileText },
-    { id: 'overview', label: 'Layers', icon: Layers }
+  const unackedAlertsCount = dashboardData?.recent_alerts?.filter(a => !a.is_acknowledged).length || 0;
+
+  const navItems: NavItem[] = [
+    { id: 'overview', label: 'Overview Dashboard', icon: LayoutDashboard },
+    { id: 'map3d', label: '3D Bengaluru Map', icon: Map },
+    { id: 'locations', label: 'Location Management', icon: MapPin },
+    { id: 'monitoring', label: 'Water Monitoring', icon: Droplets },
+    { id: 'alerts', label: 'Alerts & Incidents', icon: AlertTriangle, badge: unackedAlertsCount },
+    { id: 'routing', label: 'Route Guidance', icon: Navigation },
+    { id: 'ai', label: 'AI Assistant', icon: Bot },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
-    <aside className="w-20 bg-[#070b13]/95 backdrop-blur-md border-r border-navy-800/80 flex flex-col justify-between items-center py-4 shrink-0 select-none z-20">
-      {/* Navigation Icons Stack */}
-      <div className="flex flex-col items-center space-y-3 w-full px-2">
-        {railItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activePage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActivePage(item.id)}
-              className={`w-full flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition group ${
-                isActive
-                  ? 'bg-cyan-500/15 text-cyan-glow border border-cyan-500/40 shadow-[0_0_15px_rgba(0,242,254,0.25)] font-semibold'
-                  : 'text-slate-400 hover:text-white hover:bg-navy-900/60 border border-transparent'
-              }`}
-              title={item.label}
-            >
-              <Icon className={`w-5 h-5 mb-1 transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-glow' : 'text-slate-400 group-hover:text-cyan-400'}`} />
-              <span className="text-[10px] font-sans tracking-tight">{item.label}</span>
-            </button>
-          );
-        })}
+    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 select-none">
+      <div className="py-4">
+        <div className="px-4 pb-3 mb-2 border-b border-slate-800/80">
+          <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+            Navigation Console
+          </p>
+        </div>
+
+        <nav className="space-y-1 px-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activePage === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActivePage(item.id)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-cyan-600 text-white shadow-sm'
+                    : 'text-slate-200 hover:text-white hover:bg-slate-800/80'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    isActive ? 'bg-white text-cyan-800' : 'bg-red-500 text-white'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Settings at the Bottom */}
-      <div className="w-full px-2">
-        <button
-          onClick={() => setActivePage('settings')}
-          className={`w-full flex flex-col items-center justify-center py-2 px-1 rounded-xl transition ${
-            activePage === 'settings'
-              ? 'bg-cyan-500/15 text-cyan-glow border border-cyan-500/40'
-              : 'text-slate-500 hover:text-white hover:bg-navy-900/60'
-          }`}
-          title="Platform Settings & API Keys"
-        >
-          <Settings className="w-4 h-4 mb-0.5" />
-          <span className="text-[9px] font-sans">Settings</span>
-        </button>
+      {/* Bottom Area: Study area & disclosure badge */}
+      <div className="p-4 border-t border-slate-800 bg-slate-950/40 text-xs">
+        <div className="flex items-center space-x-2 text-slate-300 mb-1">
+          <Waves className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="font-semibold text-slate-200">Bengaluru Digital Twin</span>
+        </div>
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          BBMP & KSNDMC Urban Flood Zone. OpenFreeMap vector tiles with MapLibre GL.
+        </p>
+        <div className="mt-2.5 pt-2 border-t border-slate-800/60 text-[10px] text-slate-300 flex items-center justify-between">
+          <span>Prototype v1.0</span>
+          <span className="text-emerald-400 font-medium">Local SQLite</span>
+        </div>
       </div>
     </aside>
   );
